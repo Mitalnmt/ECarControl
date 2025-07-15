@@ -176,8 +176,15 @@ function getRemainingTimeInMillis(timeIn, car) {
 function updateCountdowns() {
   // Kiểm tra xe hết thời gian để cảnh báo
   let hasOverdue = false;
+  let needRerender = false;
   carList.forEach((car, idx) => {
-    if (!car.done && !car.isNullTime && getRemainingTimeInMillis(car.timeIn, car) <= 0) {
+    const wasOverdue = car._wasOverdue || false;
+    const isOverdue = !car.done && !car.isNullTime && getRemainingTimeInMillis(car.timeIn, car) <= 0;
+    if (isOverdue && !wasOverdue) {
+      needRerender = true;
+    }
+    car._wasOverdue = isOverdue;
+    if (isOverdue) {
       if (!overdueNotifiedIds.has(car.id)) {
         notifyOverdue(car);
         overdueNotifiedIds.add(car.id);
@@ -188,7 +195,9 @@ function updateCountdowns() {
       overdueNotifiedIds.delete(car.id);
     }
   });
-  // renderCarList(); // BỎ để đồng bộ tuyệt đối
+  if (needRerender) {
+    renderCarList();
+  }
   // Cập nhật countdown cho từng dòng (nếu bảng đã render)
   const tbody = document.getElementById('car-list').getElementsByTagName('tbody')[0];
   if (tbody) {
@@ -199,7 +208,6 @@ function updateCountdowns() {
         if (countdownCell) {
           countdownCell.innerHTML = `<span class="countdown">${getRemainingTime(carList[i].timeIn, carList[i])}</span>`;
         }
-        // --- Bổ sung cập nhật class màu đỏ khi hết giờ ---
         row.classList.remove('done', 'overdue', 'null-time-done');
         const car = carList[i];
         if (car.isNullTime) {
