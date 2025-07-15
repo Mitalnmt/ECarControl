@@ -199,6 +199,16 @@ function updateCountdowns() {
         if (countdownCell) {
           countdownCell.innerHTML = `<span class="countdown">${getRemainingTime(carList[i].timeIn, carList[i])}</span>`;
         }
+        // --- Bổ sung cập nhật class màu đỏ khi hết giờ ---
+        row.classList.remove('done', 'overdue', 'null-time-done');
+        const car = carList[i];
+        if (car.isNullTime) {
+          row.classList.add('null-time-done');
+        } else if (car.done) {
+          row.classList.add('done');
+        } else if (getRemainingTimeInMillis(car.timeIn, car) <= 0) {
+          row.classList.add('overdue');
+        }
       }
     }
   }
@@ -719,4 +729,11 @@ if (enableNotifyBtn) {
       }
     });
   };
+}
+
+const logoutBtn = document.getElementById('logoutBtn');
+if (logoutBtn) {
+  logoutBtn.addEventListener('click', function() {
+    window.open('https://mitalnmt.github.io/ECarbyMital/', '_self');
+  });
 }
