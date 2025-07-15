@@ -1,0 +1,100 @@
+.done {
+  background-color: lightgreen;  /* Xe đã trả về, màu xanh */
+}
+
+.overdue {
+  background-color: lightcoral;  /* Xe hết thời gian, màu đỏ */
+}
+
+.countdown {
+  font-weight: bold;
+  color: red;
+}
+
+.old-car-code {
+  font-size: 0.3em !important;
+  color: #6ec1ff !important;
+  margin-right: 4px;
+}
+
+.duplicate-done {
+  animation: blink-yellow 1s infinite alternate;
+  background-color: #fff8b0 !important;
+}
+@keyframes blink-yellow {
+  from { background-color: #fff8b0; }
+  to { background-color: #ffe066; }
+}
+
+.null-time-done {
+  background-color: #2196f3 !important;
+  color: #fff;
+}
+
+.old-car-row .old-car-code-italic, .old-car-code-italic {
+  font-style: italic;
+  color: #90a4ae;
+  font-size: 0.8em;
+}
+.old-car-row td {
+  background: #f8f9fa;
+  border: none !important;
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+#car-list .btn {
+  margin: 5px;
+}
+
+#car-list .old-car-code-italic {
+  font-size: 0.7em !important;
+  font-style: italic !important;
+  color: #90a4ae !important;
+}
+
+#car-list input[type="checkbox"] {
+  width: 1.5em;
+  height: 1.5em;
+  accent-color: #2196f3;
+}
+
+#car-list tr.overdue-unpaid td {
+  background-color: #ffe066 !important;
+}
+
+.car-note {
+  font-size: 0.9em;
+  color: #888;
+  font-style: italic;
+  margin-left: 6px;
+}
+
+#bottomBar {
+  position: fixed;
+  left: 0;
+  bottom: 0;
+  width: 100vw;
+  background: #fff;
+  border-top: 1px solid #ddd;
+  z-index: 9999;
+  box-shadow: 0 -2px 8px rgba(0,0,0,0.05);
+  height: 60px;
+}
+body {
+  padding-bottom: 80px; /* Để không bị che bảng bởi thanh dưới */
+}
+
+.btn-status {
+  min-width: 2.5em;
+  font-weight: bold;
+  font-size: 1.1em;
+  padding: 0.3em 1em;
+  transition: background-color 0.25s, color 0.25s, transform 0.1s;
+}
+
+.btn-status:active {
+  transform: scale(0.96);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08) inset;
+  opacity: 0.85;
+}
