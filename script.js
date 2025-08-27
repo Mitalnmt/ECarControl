@@ -298,6 +298,7 @@ function toggleDone(index) {
     car.isNullTime = false;
     car.done = false;
     car.nullStartTime = undefined;
+    saveCarListToStorage(); // Cập nhật lên database khi thoát chế độ null
   } else if (!car.done) {
     car.done = true;
     car.pausedAt = getRemainingTimeInMillis(car.timeIn, car);
@@ -341,7 +342,7 @@ function deleteCar(index) {
 
 // --- Lưu trữ Firebase Realtime Database ---
 function saveCarListToStorage() {
-  // Chuyển Date thành string ISO để lưu, pausedAt giữ nguyên kiểu số hoặc undefined
+  // Chuyển Date thành string ISO để lưu, pausedAt và nullStartTime giữ nguyên kiểu số hoặc undefined
   const data = carList.map(car => {
     const obj = {
       ...car,
@@ -353,6 +354,12 @@ function saveCarListToStorage() {
       obj.pausedAt = car.pausedAt;
     } else {
       delete obj.pausedAt;
+    }
+    // nullStartTime chỉ lưu nếu là số, nếu undefined thì bỏ
+    if (typeof car.nullStartTime === 'number') {
+      obj.nullStartTime = car.nullStartTime;
+    } else {
+      delete obj.nullStartTime;
     }
     return obj;
   });
@@ -377,6 +384,14 @@ function loadCarListFromStorage() {
           obj.pausedAt = Number(car.pausedAt);
         } else {
           obj.pausedAt = undefined;
+        }
+        // nullStartTime phải là số hoặc undefined
+        if (typeof car.nullStartTime === 'number') {
+          obj.nullStartTime = car.nullStartTime;
+        } else if (typeof car.nullStartTime === 'string' && car.nullStartTime !== '') {
+          obj.nullStartTime = Number(car.nullStartTime);
+        } else {
+          obj.nullStartTime = undefined;
         }
         return obj;
       });
@@ -699,7 +714,7 @@ function notifyOverdue(car) {
   }
   // Phát âm thanh beep
   try {
-    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const ctx = new (window.AudioContext || window.webkit.AudioContext)();
     const oscillator = ctx.createOscillator();
     oscillator.type = 'sine';
     oscillator.frequency.setValueAtTime(880, ctx.currentTime);
