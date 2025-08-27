@@ -4,31 +4,6 @@ let changeCarIndex = null; // null: chọn xe mới, số: đổi mã xe
 let defaultTimeMinutes = 15; // Thời gian mặc định (phút)
 let defaultTimeSeconds = 30; // Thời gian mặc định (giây)
 
-// Thêm xe vào danh sách hoặc đổi mã xe
-function selectCarCode(carCode) {
-  const modalEl = document.getElementById('carModal');
-  const modal = bootstrap.Modal.getInstance(modalEl);
-  if (modal) modal.hide(); // Đóng modal NGAY lập tức
-
-  setTimeout(() => {
-    if (changeCarIndex === null) {
-      addCar(carCode);
-    } else {
-      // Lưu tất cả mã xe cũ vào mảng oldCarCodes
-      if (!carList[changeCarIndex].oldCarCodes) {
-        carList[changeCarIndex].oldCarCodes = [];
-      }
-      if (carList[changeCarIndex].carCode !== carCode) {
-        carList[changeCarIndex].oldCarCodes.push(carList[changeCarIndex].carCode);
-      }
-      carList[changeCarIndex].carCode = carCode;
-      changeCarIndex = null;
-      saveCarListToStorage();
-      // renderCarList(); // BỎ
-    }
-  }, 100); // Đợi modal đóng xong mới render lại bảng
-}
-
 // Khi ấn nút chọn xe
 const showModalBtn = document.getElementById('showModalBtn');
 if (showModalBtn) {
@@ -277,7 +252,7 @@ function changeTime(index, delta = 1) {
   const row = tbody.rows[index];
   if (row) {
     // Cập nhật countdown
-    const countdownCell = row.cells[4];
+    const countdownCell = row.cells(4);
     if (countdownCell) {
       countdownCell.innerHTML = `<span class="countdown">${getRemainingTime(car.timeIn, car)}</span>`;
     }
@@ -759,4 +734,35 @@ if (logoutBtn) {
   logoutBtn.addEventListener('click', function() {
     window.open('https://mitalnmt.github.io/ECarbyMital/', '_self');
   });
+}
+
+let selectedCarCodes = new Set(); // Lưu danh sách mã xe được chọn
+
+function toggleCarSelection(carCode) {
+  if (selectedCarCodes.has(carCode)) {
+    selectedCarCodes.delete(carCode); // Bỏ chọn nếu đã chọn
+  } else {
+    selectedCarCodes.add(carCode); // Thêm vào danh sách nếu chưa chọn
+  }
+}
+
+const addCarBtn = document.getElementById('addCarBtn');
+if (addCarBtn) {
+  addCarBtn.addEventListener('click', function() {
+    selectedCarCodes.forEach(carCode => {
+      addCar(carCode); // Thêm từng xe vào danh sách
+    });
+    selectedCarCodes.clear(); // Xóa danh sách sau khi thêm
+    renderCarList(); // Cập nhật danh sách xe
+  });
+}
+
+// Cập nhật các nút mã xe để gọi toggleCarSelection
+function selectCarCode(carCode) {
+  toggleCarSelection(carCode);
+  const button = document.querySelector(`button[onclick="selectCarCode('${carCode}')"]`);
+  if (button) {
+    button.classList.toggle('btn-primary'); // Đổi màu nút để hiển thị trạng thái chọn
+    button.classList.toggle('btn-secondary');
+  }
 }
