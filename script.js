@@ -142,9 +142,9 @@ function renderCarList() {
 // Đếm ngược thời gian
 function getRemainingTime(timeIn, car) {
   if (car && car.isNullTime) {
-    if (!car.nullStartTime) return '00:00';
+    if (!car.timeOut) return '00:00';
     const now = Date.now();
-    const elapsed = Math.floor((now - car.nullStartTime) / 1000); // giây
+    const elapsed = Math.floor((now - new Date(car.timeOut).getTime()) / 1000); // Thời gian đã trôi qua từ timeOut
     const minutes = Math.floor(elapsed / 60);
     const seconds = elapsed % 60;
     return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
