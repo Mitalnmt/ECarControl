@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -15,8 +16,50 @@
     }
 
     .modal-content {
-      max-height: 400px;
+      max-height: 90vh; /* Chiều cao tối đa 90% viewport height */
       overflow-y: auto;
+    }
+
+    /* Tùy chỉnh cho modal chọn xe */
+    #carModal .modal-dialog {
+      max-width: 95%;
+      margin: 10px auto;
+    }
+
+    #carModal .modal-body {
+      padding: 15px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    #carModal .mb-2 {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-start;
+      gap: 5px;
+    }
+
+    #carModal .btn-secondary {
+      min-width: 60px;
+      margin: 2px !important;
+      padding: 8px 12px;
+    }
+
+    /* Responsive adjustments */
+    @media (min-width: 768px) {
+      #carModal .modal-dialog {
+        max-width: 700px;
+      }
+
+      #carModal .mb-2 {
+        justify-content: flex-start;
+      }
+
+      #carModal .btn-secondary {
+        min-width: 70px;
+        padding: 10px 15px;
+      }
     }
 
     .countdown {
@@ -92,25 +135,34 @@
             <button class="btn btn-secondary m-1" onclick="selectCarCode('AB')">AB</button>
           </div>
           <div class="mb-2">
-            <button class="btn btn-secondary m-1" onclick="selectCarCode('CC')">CC</button>
-            <button class="btn btn-secondary m-1" onclick="selectCarCode('CX')">CX</button>
             <button class="btn btn-secondary m-1" onclick="selectCarCode('C1')">C1</button>
             <button class="btn btn-secondary m-1" onclick="selectCarCode('C2')">C2</button>
             <button class="btn btn-secondary m-1" onclick="selectCarCode('C3')">C3</button>
             <button class="btn btn-secondary m-1" onclick="selectCarCode('C4')">C4</button>
+            <button class="btn btn-secondary m-1" onclick="selectCarCode('CC')">CC</button>
+            <button class="btn btn-secondary m-1" onclick="selectCarCode('CX')">CX</button>
+          </div>
+          <div class="mb-2">
             <button class="btn btn-secondary m-1" onclick="selectCarCode('M1')">M1</button>
             <button class="btn btn-secondary m-1" onclick="selectCarCode('M2')">M2</button>
             <button class="btn btn-secondary m-1" onclick="selectCarCode('M3')">M3</button>
+            <button class="btn btn-secondary m-1" onclick="selectCarCode('D3')">D3</button>
+          </div>
+          <div class="mb-2">
             <button class="btn btn-secondary m-1" onclick="selectCarCode('XĐ')">XĐ</button>
             <button class="btn btn-secondary m-1" onclick="selectCarCode('XT')">XT</button>
             <button class="btn btn-secondary m-1" onclick="selectCarCode('XV')">XV</button>
-            <button class="btn btn-secondary m-1" onclick="selectCarCode('D3')">D3</button>
           </div>
           <div class="mb-2">
             <button class="btn btn-secondary m-1" onclick="selectCarCode('S1')">S1</button>
             <button class="btn btn-secondary m-1" onclick="selectCarCode('S2')">S2</button>
             <button class="btn btn-secondary m-1" onclick="selectCarCode('S3')">S3</button>
             <button class="btn btn-secondary m-1" onclick="selectCarCode('S4')">S4</button>
+          </div>
+          <div class="mb-2">
+            <button class="btn btn-secondary m-1" onclick="selectCarCode('03')">03</button>
+            <button class="btn btn-secondary m-1" onclick="selectCarCode('06')">06</button>
+            <button class="btn btn-secondary m-1" onclick="selectCarCode('09')">09</button>
             <button class="btn btn-secondary m-1" onclick="selectCarCode('10')">10</button>
             <button class="btn btn-secondary m-1" onclick="selectCarCode('25')">25</button>
           </div>
@@ -118,9 +170,6 @@
             <button class="btn btn-secondary m-1" onclick="selectCarCode('ĐM')">ĐM</button>
             <button class="btn btn-secondary m-1" onclick="selectCarCode('ĐC')">ĐC</button>
             <button class="btn btn-secondary m-1" onclick="selectCarCode('VH')">VH</button>
-            <button class="btn btn-secondary m-1" onclick="selectCarCode('03')">03</button>
-            <button class="btn btn-secondary m-1" onclick="selectCarCode('06')">06</button>
-            <button class="btn btn-secondary m-1" onclick="selectCarCode('09')">09</button>
           </div>
         </div>
       </div>
