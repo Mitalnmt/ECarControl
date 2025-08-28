@@ -4,6 +4,120 @@ let changeCarIndex = null; // null: chọn xe mới, số: đổi mã xe
 let defaultTimeMinutes = 15; // Thời gian mặc định (phút)
 let defaultTimeSeconds = 30; // Thời gian mặc định (giây)
 
+// Biến cho chức năng undo
+let undoHistory = []; // Lưu lịch sử các thao tác
+let maxUndoSteps = 20; // Số bước undo tối đa
+let undoInProgress = false; // Cờ để tránh undo liên tiếp
+
+// Hàm lưu trạng thái hiện tại vào lịch sử
+function saveToHistory() {
+  try {
+    // Kiểm tra xem có thay đổi thực sự không
+    const currentState = JSON.stringify(carList.map(car => ({
+      ...car,
+      timeOut: car.timeOut.toISOString(),
+      timeIn: car.timeIn.toISOString()
+    })));
+    
+    // So sánh với trạng thái cuối cùng trong lịch sử
+    if (undoHistory.length > 0) {
+      const lastState = undoHistory[undoHistory.length - 1];
+      if (lastState === currentState) {
+        return; // Không lưu nếu trạng thái giống nhau
+      }
+    }
+    
+    undoHistory.push(currentState);
+    
+    // Giới hạn số bước undo
+    if (undoHistory.length > maxUndoSteps) {
+      undoHistory.shift();
+    }
+  } catch (error) {
+    console.error('Lỗi khi lưu lịch sử:', error);
+  }
+}
+
+// Hàm undo - quay lại trạng thái trước đó
+function undo() {
+  // Kiểm tra xem có đang thực hiện undo không
+  if (undoInProgress) {
+    return;
+  }
+  
+  if (undoHistory.length === 0) {
+    showToast('Không có thao tác nào để quay lại!', 'warning');
+    return;
+  }
+  
+  // Đặt cờ để tránh undo liên tiếp
+  undoInProgress = true;
+  
+  try {
+    const previousState = undoHistory.pop();
+    const previousCarList = JSON.parse(previousState).map(car => ({
+      ...car,
+      timeOut: new Date(car.timeOut),
+      timeIn: new Date(car.timeIn)
+    }));
+    
+    // Cập nhật carList
+    carList = previousCarList;
+    
+    // Gọi saveCarListToStorage với skipHistory=true để không tạo loop
+    saveCarListToStorage(true);
+    
+    // Render lại giao diện ngay lập tức
+    renderCarList();
+    
+    // Hiển thị thông báo
+    showToast(`Đã quay lại! (${carList.length} xe)`, 'success');
+    
+  } catch (error) {
+    console.error('Lỗi khi thực hiện undo:', error);
+    showToast('Có lỗi xảy ra khi undo!', 'danger');
+  } finally {
+    // Reset cờ sau 300ms
+    setTimeout(() => {
+      undoInProgress = false;
+    }, 300);
+  }
+}
+
+// Hàm hiển thị toast thông báo
+function showToast(message, type = 'info') {
+  // Tạo toast element nếu chưa có
+  let toastContainer = document.getElementById('toastContainer');
+  if (!toastContainer) {
+    toastContainer = document.createElement('div');
+    toastContainer.id = 'toastContainer';
+    toastContainer.className = 'position-fixed top-0 start-50 translate-middle-x p-3';
+    toastContainer.style.zIndex = '9999';
+    document.body.appendChild(toastContainer);
+  }
+  
+  const toastId = 'toast-' + Date.now();
+  const toastHtml = `
+    <div id="${toastId}" class="toast align-items-center text-white bg-${type} border-0" role="alert" aria-live="assertive" aria-atomic="true">
+      <div class="d-flex">
+        <div class="toast-body">${message}</div>
+        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+      </div>
+    </div>
+  `;
+  
+  toastContainer.insertAdjacentHTML('beforeend', toastHtml);
+  
+  const toastElement = document.getElementById(toastId);
+  const toast = new bootstrap.Toast(toastElement);
+  toast.show();
+  
+  // Tự động xóa toast sau khi ẩn
+  toastElement.addEventListener('hidden.bs.toast', () => {
+    toastElement.remove();
+  });
+}
+
 // Thêm xe vào danh sách hoặc đổi mã xe
 function selectCarCode(carCode) {
   const modalEl = document.getElementById('carModal');
@@ -23,7 +137,7 @@ function selectCarCode(carCode) {
       }
       carList[changeCarIndex].carCode = carCode;
       changeCarIndex = null;
-      saveCarListToStorage();
+      saveCarListToStorage(false);
       // renderCarList(); // BỎ
     }
   }, 100); // Đợi modal đóng xong mới render lại bảng
@@ -56,7 +170,7 @@ function addCar(carCode) {
   };
 
   carList.push(car);
-  saveCarListToStorage();
+  saveCarListToStorage(false);
   // renderCarList(); // BỎ
 
   // Đóng modal sau khi chọn xe
@@ -244,7 +358,7 @@ function togglePaid(index) {
     }
   }
   // Lưu dữ liệu sau khi đã cập nhật UI
-  saveCarListToStorage();
+  saveCarListToStorage(false);
 }
 
 // Đổi mã xe
@@ -271,7 +385,7 @@ function changeTime(index, delta = 1) {
   }
 
   car.timeIn = newTimeIn;
-  saveCarListToStorage();
+  saveCarListToStorage(false);
   // Chỉ cập nhật lại countdown và class cho dòng này
   const tbody = document.getElementById('car-list').getElementsByTagName('tbody')[0];
   const row = tbody.rows[index];
@@ -298,7 +412,7 @@ function toggleDone(index) {
     car.isNullTime = false;
     car.done = false;
     car.nullStartTime = undefined;
-    saveCarListToStorage(); // Cập nhật lên database khi thoát chế độ null
+    saveCarListToStorage(false); // Cập nhật lên database khi thoát chế độ null
   } else if (!car.done) {
     car.done = true;
     car.pausedAt = getRemainingTimeInMillis(car.timeIn, car);
@@ -329,19 +443,25 @@ function toggleDone(index) {
       row.classList.add('overdue');
     }
   }
-  saveCarListToStorage();
+  saveCarListToStorage(false);
 }
 
 // Xóa xe khỏi danh sách
 function deleteCar(index) {
   if (!confirm('Bạn có chắc chắn muốn xóa dòng này?')) return;
+  
   carList.splice(index, 1);
-  saveCarListToStorage();
+  saveCarListToStorage(false);
   // renderCarList(); // BỎ
 }
 
 // --- Lưu trữ Firebase Realtime Database ---
-function saveCarListToStorage() {
+function saveCarListToStorage(skipHistory = false) {
+  // Lưu trạng thái vào lịch sử trước khi thay đổi (nếu không skip)
+  if (!skipHistory) {
+    saveToHistory();
+  }
+  
   // Chuyển Date thành string ISO để lưu, pausedAt và nullStartTime giữ nguyên kiểu số hoặc undefined
   const data = carList.map(car => {
     const obj = {
@@ -399,6 +519,20 @@ function loadCarListFromStorage() {
       carList = [];
     }
     renderCarList();
+    
+    // Lưu trạng thái sau khi load dữ liệu từ Firebase (chỉ khi khởi tạo)
+    if (!window.initialLoadComplete) {
+      window.initialLoadComplete = true;
+      setTimeout(() => {
+        // Lưu trạng thái ban đầu mà không kiểm tra trùng lặp
+        const currentState = JSON.stringify(carList.map(car => ({
+          ...car,
+          timeOut: car.timeOut.toISOString(),
+          timeIn: car.timeIn.toISOString()
+        })));
+        undoHistory.push(currentState);
+      }, 100);
+    }
   });
   const idCounter = localStorage.getItem('carIdCounter');
   if (idCounter) carIdCounter = Number(idCounter);
@@ -434,7 +568,7 @@ if (confirmDeleteAllBtn) {
     if (confirmDeleteAllCountSpan) confirmDeleteAllCountSpan.textContent = confirmDeleteAllCount;
     if (confirmDeleteAllCount >= 5) {
       carList = [];
-      saveCarListToStorage();
+      saveCarListToStorage(false);
       // renderCarList(); // BỎ
       if (confirmDeleteAllModal) confirmDeleteAllModal.hide();
     }
@@ -458,6 +592,7 @@ function openTimeModal(index) {
 
 function changeTimeByDelta(deltaMin) {
   if (currentTimeIndex === null) return;
+  
   const car = carList[currentTimeIndex];
   if (car.isNullTime) car.isNullTime = false; // Nếu đang null thì bỏ null khi chỉnh lại
   const newTimeIn = new Date(car.timeIn);
@@ -467,7 +602,7 @@ function changeTimeByDelta(deltaMin) {
     return;
   }
   car.timeIn = newTimeIn;
-  saveCarListToStorage();
+  saveCarListToStorage(false);
   // renderCarList(); // BỎ
 }
 
@@ -495,11 +630,12 @@ if (plus5Btn) {
 if (nullTimeBtn) {
   nullTimeBtn.onclick = () => {
     if (currentTimeIndex === null) return;
+    
     const car = carList[currentTimeIndex];
     car.isNullTime = true;
     car.done = true;
     car.nullStartTime = Date.now();
-    saveCarListToStorage();
+    saveCarListToStorage(false);
     // renderCarList(); // BỎ
     if (timeModal) timeModal.hide();
   };
@@ -545,7 +681,7 @@ if (rowActionNoteBtn) {
       const note = prompt('Nhập ghi chú cho xe:', car.note || '');
       if (note !== null) {
         car.note = note.trim();
-        saveCarListToStorage();
+        saveCarListToStorage(false);
         // renderCarList(); // BỎ
       }
     }
@@ -760,3 +896,22 @@ if (logoutBtn) {
     window.open('https://mitalnmt.github.io/ECarbyMital/', '_self');
   });
 }
+
+// --- Event listener cho nút Back và phím tắt Ctrl+Z ---
+const backBtn = document.getElementById('backBtn');
+if (backBtn) {
+  backBtn.addEventListener('click', function(e) {
+    e.preventDefault(); // Ngăn chặn sự kiện mặc định
+    e.stopPropagation(); // Ngăn chặn event bubbling
+    undo();
+  });
+}
+
+// Phím tắt Ctrl+Z để undo
+document.addEventListener('keydown', function(e) {
+  if ((e.ctrlKey || e.metaKey) && e.key === 'z') {
+    e.preventDefault(); // Ngăn chặn hành vi mặc định của trình duyệt
+    e.stopPropagation(); // Ngăn chặn event bubbling
+    undo();
+  }
+});

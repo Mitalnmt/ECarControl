@@ -98,3 +98,27 @@ body {
   box-shadow: 0 2px 8px rgba(0,0,0,0.08) inset;
   opacity: 0.85;
 }
+
+/* CSS cho nút Back */
+#backBtn {
+  font-weight: bold;
+  transition: all 0.2s ease;
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-size: 14px;
+}
+
+#backBtn:hover {
+  transform: translateX(-2px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+
+#backBtn:active {
+  transform: translateX(0);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* Toast container */
+#toastContainer {
+  margin-top: 20px;
+}
