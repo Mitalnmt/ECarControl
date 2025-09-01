@@ -965,4 +965,64 @@ document.addEventListener('DOMContentLoaded', function() {
       }
     });
   }
+
+  // Fullscreen functionality
+  const fullscreenBtn = document.getElementById('fullscreenBtn');
+  if (fullscreenBtn) {
+    fullscreenBtn.addEventListener('click', function() {
+      toggleFullscreen();
+    });
+  }
 });
+
+// Hàm chuyển đổi toàn màn hình
+function toggleFullscreen() {
+  if (!document.fullscreenElement) {
+    // Vào chế độ toàn màn hình
+    if (document.documentElement.requestFullscreen) {
+      document.documentElement.requestFullscreen();
+    } else if (document.documentElement.webkitRequestFullscreen) {
+      document.documentElement.webkitRequestFullscreen();
+    } else if (document.documentElement.msRequestFullscreen) {
+      document.documentElement.msRequestFullscreen();
+    }
+  } else {
+    // Thoát chế độ toàn màn hình
+    if (document.exitFullscreen) {
+      document.exitFullscreen();
+    } else if (document.webkitExitFullscreen) {
+      document.webkitExitFullscreen();
+    } else if (document.msExitFullscreen) {
+      document.msExitFullscreen();
+    }
+  }
+}
+
+// Lắng nghe sự kiện thay đổi toàn màn hình để cập nhật icon
+document.addEventListener('fullscreenchange', updateFullscreenIcon);
+document.addEventListener('webkitfullscreenchange', updateFullscreenIcon);
+document.addEventListener('msfullscreenchange', updateFullscreenIcon);
+
+function updateFullscreenIcon() {
+  const fullscreenBtn = document.getElementById('fullscreenBtn');
+  if (!fullscreenBtn) return;
+
+  if (document.fullscreenElement || document.webkitFullscreenElement || document.msFullscreenElement) {
+    // Đang ở chế độ toàn màn hình - hiển thị icon thoát
+    fullscreenBtn.innerHTML = `
+      <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+        <path d="M5.5 0a.5.5 0 0 1 .5.5v4A1.5 1.5 0 0 1 4.5 6h-4a.5.5 0 0 1 0-1h3.5a.5.5 0 0 0 .5-.5v-4a.5.5 0 0 1 .5-.5zm5 0a.5.5 0 0 1 .5.5v4a.5.5 0 0 0 .5.5h3.5a.5.5 0 0 1 0 1h-4A1.5 1.5 0 0 1 10 4.5v-4a.5.5 0 0 1 .5-.5zM0 10.5a.5.5 0 0 1 .5-.5h4A1.5 1.5 0 0 1 6 11.5v4a.5.5 0 0 1-1 0v-3.5a.5.5 0 0 0-.5-.5h-4a.5.5 0 0 1-.5-.5zm10 1a1.5 1.5 0 0 1 1.5-1.5h3.5a.5.5 0 0 1 0 1h-4a.5.5 0 0 0-.5.5v4a.5.5 0 0 1-1 0v-4z"/>
+      </svg>
+    `;
+    fullscreenBtn.title = 'Thoát toàn màn hình';
+  } else {
+    // Không ở chế độ toàn màn hình - hiển thị icon vào
+    fullscreenBtn.innerHTML = `
+      <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+        <path d="M1.5 1a.5.5 0 0 0-.5.5v4a.5.5 0 0 1-.5.5h-1a.5.5 0 0 0 0 1H1v1a.5.5 0 0 0 1 0V7h1a.5.5 0 0 0 0-1H1V1.5a.5.5 0 0 0-.5-.5z"/>
+        <path d="M14.5 1a.5.5 0 0 1 .5.5v4a.5.5 0 0 0 .5.5h1a.5.5 0 0 1 0 1H16v1a.5.5 0 0 1-1 0V7h-1a.5.5 0 0 1 0-1h1V1.5a.5.5 0 0 1 .5-.5z"/>
+      </svg>
+    `;
+    fullscreenBtn.title = 'Toàn màn hình';
+  }
+}

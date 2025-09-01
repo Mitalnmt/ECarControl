@@ -88,7 +88,15 @@
 <body>
   <!-- Main content -->
   <div class="container mt-3">
-    <h3>Danh sách xe cho thuê</h3>
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h3 class="mb-0">Danh sách xe cho thuê</h3>
+      <button class="btn btn-outline-secondary btn-sm" id="fullscreenBtn" title="Toàn màn hình">
+        <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+          <path d="M1.5 1a.5.5 0 0 0-.5.5v4a.5.5 0 0 1-.5.5h-1a.5.5 0 0 0 0 1H1v1a.5.5 0 0 0 1 0V7h1a.5.5 0 0 0 0-1H1V1.5a.5.5 0 0 0-.5-.5z"/>
+          <path d="M14.5 1a.5.5 0 0 1 .5.5v4a.5.5 0 0 0 .5.5h1a.5.5 0 0 1 0 1H16v1a.5.5 0 0 1-1 0V7h-1a.5.5 0 0 1 0-1h1V1.5a.5.5 0 0 1 .5-.5z"/>
+        </svg>
+      </button>
+    </div>
     <table class="table table-striped" id="car-list">
       <thead>
         <tr>
@@ -109,7 +117,8 @@
   <!-- Bottom bar đặt ngoài container để luôn nổi trên màn hình -->
   <div id="bottomBar" class="d-flex justify-content-between align-items-center px-3 py-2">
     <button class="btn btn-secondary" id="settingsBtn">Cài đặt</button>
-    <button class="btn btn-primary mx-auto" id="showModalBtn" data-bs-toggle="modal" data-bs-target="#carModal">Chọn Xe</button>
+    <button class="btn btn-primary" id="showModalBtn" data-bs-toggle="modal" data-bs-target="#carModal">Chọn Xe</button>
+    <div style="width: 80px;"></div> <!-- Spacer để cân bằng với nút Cài đặt -->
   </div>
 
   <!-- Modal -->

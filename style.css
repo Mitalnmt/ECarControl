@@ -80,7 +80,9 @@
   z-index: 9999;
   box-shadow: 0 -2px 8px rgba(0,0,0,0.05);
   height: 60px;
-  justify-content: center;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 body {
   padding-bottom: 80px; /* Để không bị che bảng bởi thanh dưới */
