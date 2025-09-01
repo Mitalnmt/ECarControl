@@ -6,6 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Xe Cho Thuê</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -83,23 +84,120 @@
       from { opacity: 1; }
       to { opacity: 0.7; }
     }
+
+    /* Bottom bar with floating design */
+    #bottomBar {
+      position: fixed;
+      left: 0;
+      bottom: 0;
+      width: 100vw;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      border-top: 1px solid rgba(0,0,0,0.1);
+      z-index: 9999;
+      box-shadow: 0 -4px 20px rgba(0,0,0,0.1);
+      height: 60px;
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      padding: 0 20px;
+      transition: all 0.3s ease;
+    }
+
+    #bottomBar .btn {
+      border-radius: 8px;
+      padding: 8px 16px;
+      font-weight: 500;
+      transition: all 0.2s ease;
+      border: 1px solid rgba(0,0,0,0.1);
+    }
+
+    #bottomBar .btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    }
+
+    #bottomBar .btn:active {
+      transform: translateY(0);
+    }
+
+    /* Virtual spacer to prevent content from being hidden */
+    #bottomSpacer {
+      height: 50px; /* Reduced height since we have spacer row in table */
+      width: 100%;
+    }
+
+    /* Spacer row styling */
+    .spacer-row {
+      background: transparent !important;
+      border: none !important;
+    }
+
+    .spacer-row td {
+      background: transparent !important;
+      border: none !important;
+      padding: 0 !important;
+      height: 100px !important;
+    }
+
+    body {
+      padding-bottom: 80px; /* Giảm padding bottom vì đã có spacer row */
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+      #bottomBar {
+        height: 55px;
+        padding: 0 15px;
+      }
+
+      #bottomBar .btn {
+        padding: 6px 12px;
+        font-size: 13px;
+      }
+
+      #bottomSpacer {
+        height: 40px;
+      }
+
+      body {
+        padding-bottom: 60px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      #bottomBar {
+        height: 50px;
+        padding: 0 10px;
+      }
+
+      #bottomBar .btn {
+        padding: 5px 10px;
+        font-size: 12px;
+      }
+
+      #bottomSpacer {
+        height: 35px;
+      }
+
+      body {
+        padding-bottom: 50px;
+      }
+    }
   </style>
 </head>
 <body>
   <!-- Main content -->
-      <div class="container mt-3">
-      <div class="d-flex justify-content-between align-items-center mb-3">
-        <h3 class="mb-0">Danh sách xe cho thuê</h3>
-        <div class="d-flex align-items-center gap-2">
-          <small class="text-muted" title="Ấn giữ vào dòng để mở menu thao tác">💡 Ấn giữ dòng để mở menu</small>
-          <button class="btn btn-outline-secondary btn-sm" id="fullscreenBtn" title="Toàn màn hình">
-            <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-              <path d="M1.5 1a.5.5 0 0 0-.5.5v4a.5.5 0 0 1-.5.5h-1a.5.5 0 0 0 0 1H1v1a.5.5 0 0 0 1 0V7h1a.5.5 0 0 0 0-1H1V1.5a.5.5 0 0 0-.5-.5z"/>
-              <path d="M14.5 1a.5.5 0 0 1 .5.5v4a.5.5 0 0 0 .5.5h1a.5.5 0 0 1 0 1H16v1a.5.5 0 0 1-1 0V7h-1a.5.5 0 0 1 0-1h1V1.5a.5.5 0 0 1 .5-.5z"/>
-            </svg>
-          </button>
-        </div>
-      </div>
+  <div class="container mt-3">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h3 class="mb-0">Danh sách xe cho thuê</h3>
+      <button class="btn btn-outline-secondary btn-sm" id="fullscreenBtn" title="Toàn màn hình">
+        <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+          <path d="M1.5 1a.5.5 0 0 0-.5.5v4a.5.5 0 0 1-.5.5h-1a.5.5 0 0 0 0 1H1v1a.5.5 0 0 0 1 0V7h1a.5.5 0 0 0 0-1H1V1.5a.5.5 0 0 0-.5-.5z"/>
+          <path d="M14.5 1a.5.5 0 0 1 .5.5v4a.5.5 0 0 0 .5.5h1a.5.5 0 0 1 0 1H16v1a.5.5 0 0 1-1 0V7h-1a.5.5 0 0 1 0-1h1V1.5a.5.5 0 0 1 .5-.5z"/>
+        </svg>
+      </button>
+    </div>
     <table class="table table-striped" id="car-list">
       <thead>
         <tr>
@@ -117,12 +215,17 @@
     </table>
   </div>
 
-  <!-- Bottom bar đặt ngoài container để luôn nổi trên màn hình -->
-  <div id="bottomBar" class="d-flex justify-content-between align-items-center px-3 py-2">
-    <button class="btn btn-secondary" id="settingsBtn">Cài đặt</button>
-    <button class="btn btn-primary" id="showModalBtn" data-bs-toggle="modal" data-bs-target="#carModal">Chọn Xe</button>
-    <button class="btn btn-info" id="selectMultipleBtn" data-bs-toggle="modal" data-bs-target="#selectMultipleModal">Chọn Nhiều</button>
+  <!-- Bottom bar with floating design -->
+  <div id="bottomBar">
+    <button class="btn btn-secondary btn-sm" id="settingsBtn">Cài đặt</button>
+    <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#carModal">
+      <i class="fas fa-car"></i> Chọn Xe
+    </button>
+    <button class="btn btn-info btn-sm" id="exportCarsBtn">Xuất danh sách</button>
   </div>
+
+  <!-- Virtual spacer to prevent content from being hidden behind floating bottom bar -->
+  <div id="bottomSpacer"></div>
 
   <!-- Modal -->
 <div class="modal fade" id="carModal" tabindex="-1" aria-labelledby="carModalLabel" aria-hidden="true">
@@ -218,11 +321,6 @@
           <button class="btn btn-success m-1" id="plus1Btn">+1 min</button>
           <button class="btn btn-success m-1" id="plus5Btn">+5 min</button>
           <button class="btn btn-secondary m-1" id="nullTimeBtn">Null</button>
-          <hr>
-          <div class="mt-2">
-            <button class="btn btn-info m-1" id="minusExtraBtn">-1 xuất</button>
-            <button class="btn btn-info m-1" id="plusExtraBtn">+1 xuất</button>
-          </div>
         </div>
       </div>
     </div>
@@ -250,23 +348,6 @@
               </div>
             </div>
             <small class="text-muted">Thời gian mặc định: <span id="defaultTimeDisplay">15:00</span></small>
-          </div>
-
-          <div class="mb-3">
-            <label for="defaultExtraInput" class="form-label">Thêm xuất mặc định:</label>
-            <div class="row">
-              <div class="col-6">
-                <label for="defaultExtraMinutesInput" class="form-label">Phút:</label>
-                <input type="number" class="form-control" id="defaultExtraMinutesInput" min="1" max="60" value="15">
-              </div>
-              <div class="col-6">
-                <label class="form-label">&nbsp;</label>
-                <div class="form-control-plaintext">
-                  <small class="text-muted">Thời gian xuất: <span id="defaultExtraDisplay">15 phút</span></small>
-                </div>
-              </div>
-            </div>
-            <small class="text-muted">Thời gian cộng/trừ khi ấn nút "-1 xuất" hoặc "+1 xuất"</small>
           </div>
 
           

@@ -199,33 +199,3 @@ body {
     padding: 10px 15px;
   }
 }
-
-/* Long Press Styles */
-.long-press-active {
-  background-color: #e3f2fd !important;
-  transform: scale(0.98);
-  transition: all 0.2s ease;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-}
-
-#car-list tr {
-  cursor: pointer;
-  user-select: none;
-  transition: all 0.2s ease;
-}
-
-#car-list tr:hover {
-  background-color: #f8f9fa;
-}
-
-#car-list tr:active {
-  transform: scale(0.99);
-}
-
-/* Disable text selection during long press */
-#car-list tr.long-press-active * {
-  user-select: none;
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-}
