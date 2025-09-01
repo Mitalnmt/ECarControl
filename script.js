@@ -3,11 +3,18 @@ let carIdCounter = 1;
 let changeCarIndex = null; // null: chọn xe mới, số: đổi mã xe
 let defaultTimeMinutes = 15; // Thời gian mặc định (phút)
 let defaultTimeSeconds = 30; // Thời gian mặc định (giây)
+let defaultExtraMinutes = 15; // Thời gian xuất mặc định (phút)
 
 // Biến cho chức năng undo
 let undoHistory = []; // Lưu lịch sử các thao tác
 let maxUndoSteps = 20; // Số bước undo tối đa
 let undoInProgress = false; // Cờ để tránh undo liên tiếp
+
+// Biến cho chức năng long press
+let longPressTimer = null;
+let longPressDelay = 400; // 500ms để kích hoạt long press
+let isLongPress = false;
+let currentLongPressRow = null;
 
 // Hàm lưu trạng thái hiện tại vào lịch sử
 function saveToHistory() {
@@ -116,6 +123,93 @@ function showToast(message, type = 'info') {
   toastElement.addEventListener('hidden.bs.toast', () => {
     toastElement.remove();
   });
+}
+
+// Hàm xử lý long press
+function handleLongPressStart(event, rowIndex) {
+  // Chỉ xử lý cho touch và mouse events
+  if (event.type !== 'touchstart' && event.type !== 'mousedown') return;
+  
+  // Kiểm tra nếu click vào button thì không xử lý long press
+  if (event.target.tagName === 'BUTTON' || event.target.closest('button')) {
+    return;
+  }
+  
+  // Ngăn chặn context menu mặc định
+  event.preventDefault();
+  
+  currentLongPressRow = rowIndex;
+  isLongPress = false;
+  
+  // Bắt đầu timer cho long press
+  longPressTimer = setTimeout(() => {
+    isLongPress = true;
+    // Thêm hiệu ứng visual feedback
+    const row = event.target.closest('tr');
+    if (row) {
+      row.classList.add('long-press-active');
+    }
+    // Mở modal thao tác
+    openRowActionModal(rowIndex);
+    showToast('Đã mở menu thao tác!', 'success');
+  }, longPressDelay);
+}
+
+// Hàm xử lý kết thúc long press
+function handleLongPressEnd(event) {
+  // Chỉ xử lý cho touch và mouse events
+  if (event.type !== 'touchend' && event.type !== 'mouseup' && event.type !== 'mouseleave') return;
+  
+  // Xóa timer nếu chưa kích hoạt long press
+  if (longPressTimer) {
+    clearTimeout(longPressTimer);
+    longPressTimer = null;
+  }
+  
+  // Xóa hiệu ứng visual feedback
+  const row = event.target.closest('tr');
+  if (row) {
+    row.classList.remove('long-press-active');
+  }
+  
+  // Reset trạng thái
+  if (isLongPress) {
+    isLongPress = false;
+    currentLongPressRow = null;
+  }
+  
+  // Xóa startTouch reference
+  if (event.target._startTouch) {
+    delete event.target._startTouch;
+  }
+}
+
+// Hàm xử lý di chuyển (để hủy long press nếu di chuyển quá xa)
+function handleLongPressMove(event) {
+  if (!longPressTimer) return;
+  
+  // Ngăn chặn scroll khi đang long press
+  event.preventDefault();
+  
+  // Nếu di chuyển quá xa, hủy long press
+  const touch = event.touches ? event.touches[0] : event;
+  const startTouch = event.target._startTouch;
+  
+  if (startTouch) {
+    const distance = Math.sqrt(
+      Math.pow(touch.clientX - startTouch.clientX, 2) + 
+      Math.pow(touch.clientY - startTouch.clientY, 2)
+    );
+    
+    if (distance > 10) { // 10px threshold
+      clearTimeout(longPressTimer);
+      longPressTimer = null;
+      const row = event.target.closest('tr');
+      if (row) {
+        row.classList.remove('long-press-active');
+      }
+    }
+  }
 }
 
 // Thêm xe vào danh sách hoặc đổi mã xe
@@ -246,6 +340,29 @@ function renderCarList() {
       <button class="btn btn-success btn-sm" onclick="toggleDone(${index})">${car.done ? 'Resume' : 'Done'}</button>
       <button class='btn btn-secondary btn-sm' onclick='openRowActionModal(${index})'>...</button>
     `;
+
+    // Thêm event listeners cho long press
+    row.addEventListener('touchstart', (e) => {
+      e.target._startTouch = e.touches[0];
+      handleLongPressStart(e, index);
+    });
+    row.addEventListener('touchend', handleLongPressEnd);
+    row.addEventListener('touchmove', handleLongPressMove);
+    
+    row.addEventListener('mousedown', (e) => {
+      e.target._startTouch = { clientX: e.clientX, clientY: e.clientY };
+      handleLongPressStart(e, index);
+    });
+    row.addEventListener('mouseup', handleLongPressEnd);
+    row.addEventListener('mouseleave', handleLongPressEnd);
+    row.addEventListener('mousemove', handleLongPressMove);
+    
+    // Ngăn chặn long press trên các nút
+    const buttons = row.querySelectorAll('button');
+    buttons.forEach(button => {
+      button.addEventListener('touchstart', (e) => e.stopPropagation());
+      button.addEventListener('mousedown', (e) => e.stopPropagation());
+    });
 
     // Không render dòng phụ nữa
   });
@@ -587,6 +704,8 @@ const minus1Btn = document.getElementById('minus1Btn');
 const plus1Btn = document.getElementById('plus1Btn');
 const plus5Btn = document.getElementById('plus5Btn');
 const nullTimeBtn = document.getElementById('nullTimeBtn');
+const minusExtraBtn = document.getElementById('minusExtraBtn');
+const plusExtraBtn = document.getElementById('plusExtraBtn');
 
 function openTimeModal(index) {
   currentTimeIndex = index;
@@ -607,6 +726,30 @@ function changeTimeByDelta(deltaMin) {
   car.timeIn = newTimeIn;
   saveCarListToStorage(false);
   // renderCarList(); // BỎ
+}
+
+function changeTimeByExtra(direction) {
+  if (currentTimeIndex === null) return;
+  
+  const car = carList[currentTimeIndex];
+  if (car.isNullTime) car.isNullTime = false; // Nếu đang null thì bỏ null khi chỉnh lại
+  
+  const deltaMinutes = direction * defaultExtraMinutes;
+  const newTimeIn = new Date(car.timeIn);
+  newTimeIn.setMinutes(newTimeIn.getMinutes() + deltaMinutes);
+  
+  if (newTimeIn < car.timeOut) {
+    alert('Thời gian vào không thể nhỏ hơn thời gian ra!');
+    return;
+  }
+  
+  car.timeIn = newTimeIn;
+  saveCarListToStorage(false);
+  // renderCarList(); // BỎ
+  
+  // Hiển thị thông báo
+  const action = direction > 0 ? 'cộng' : 'trừ';
+  showToast(`Đã ${action} ${defaultExtraMinutes} phút!`, 'success');
 }
 
 // Gán event listener một lần duy nhất
@@ -641,6 +784,18 @@ if (nullTimeBtn) {
     saveCarListToStorage(false);
     // renderCarList(); // BỎ
     if (timeModal) timeModal.hide();
+  };
+}
+if (minusExtraBtn) {
+  minusExtraBtn.onclick = () => {
+    if (currentTimeIndex === null) return;
+    changeTimeByExtra(-1);
+  };
+}
+if (plusExtraBtn) {
+  plusExtraBtn.onclick = () => {
+    if (currentTimeIndex === null) return;
+    changeTimeByExtra(1);
   };
 }
 
@@ -699,6 +854,7 @@ const exportCarsBtn = document.getElementById('exportCarsBtn');
 const settingsModalEl = document.getElementById('settingsModal');
 const defaultMinutesInput = document.getElementById('defaultMinutesInput');
 const defaultSecondsInput = document.getElementById('defaultSecondsInput');
+const defaultExtraMinutesInput = document.getElementById('defaultExtraMinutesInput');
 let settingsModal = null;
 if (settingsModalEl) {
   settingsModal = bootstrap.Modal.getOrCreateInstance(settingsModalEl);
@@ -728,19 +884,31 @@ if (defaultMinutesInput) {
 if (defaultSecondsInput) {
   defaultSecondsInput.addEventListener('input', updateDefaultTimeDisplay);
 }
+if (defaultExtraMinutesInput) {
+  defaultExtraMinutesInput.addEventListener('input', updateDefaultExtraDisplay);
+}
 
 function loadSettings() {
   const savedDefaultTime = localStorage.getItem('defaultTimeMinutes');
   const savedDefaultSeconds = localStorage.getItem('defaultTimeSeconds');
+  const savedDefaultExtra = localStorage.getItem('defaultExtraMinutes');
+  
   if (savedDefaultTime) {
     defaultTimeMinutes = Number(savedDefaultTime);
   }
   if (savedDefaultSeconds) {
     defaultTimeSeconds = Number(savedDefaultSeconds);
   }
+  if (savedDefaultExtra) {
+    defaultExtraMinutes = Number(savedDefaultExtra);
+  }
+  
   const defaultMinutesInput = document.getElementById('defaultMinutesInput');
   const defaultSecondsInput = document.getElementById('defaultSecondsInput');
   const defaultTimeDisplay = document.getElementById('defaultTimeDisplay');
+  const defaultExtraMinutesInput = document.getElementById('defaultExtraMinutesInput');
+  const defaultExtraDisplay = document.getElementById('defaultExtraDisplay');
+  
   if (defaultMinutesInput) {
     defaultMinutesInput.value = defaultTimeMinutes;
   }
@@ -750,11 +918,19 @@ function loadSettings() {
   if (defaultTimeDisplay) {
     defaultTimeDisplay.textContent = `${String(defaultTimeMinutes).padStart(2, '0')}:${String(defaultTimeSeconds).padStart(2, '0')}`;
   }
+  if (defaultExtraMinutesInput) {
+    defaultExtraMinutesInput.value = defaultExtraMinutes;
+  }
+  if (defaultExtraDisplay) {
+    defaultExtraDisplay.textContent = `${defaultExtraMinutes} phút`;
+  }
 }
 
 function saveSettings() {
   const defaultMinutesInput = document.getElementById('defaultMinutesInput');
   const defaultSecondsInput = document.getElementById('defaultSecondsInput');
+  const defaultExtraMinutesInput = document.getElementById('defaultExtraMinutesInput');
+  
   if (defaultMinutesInput) {
     defaultTimeMinutes = Number(defaultMinutesInput.value);
     localStorage.setItem('defaultTimeMinutes', defaultTimeMinutes);
@@ -763,9 +939,19 @@ function saveSettings() {
     defaultTimeSeconds = Number(defaultSecondsInput.value);
     localStorage.setItem('defaultTimeSeconds', defaultTimeSeconds);
   }
+  if (defaultExtraMinutesInput) {
+    defaultExtraMinutes = Number(defaultExtraMinutesInput.value);
+    localStorage.setItem('defaultExtraMinutes', defaultExtraMinutes);
+  }
+  
   const defaultTimeDisplay = document.getElementById('defaultTimeDisplay');
+  const defaultExtraDisplay = document.getElementById('defaultExtraDisplay');
+  
   if (defaultTimeDisplay) {
     defaultTimeDisplay.textContent = `${String(defaultTimeMinutes).padStart(2, '0')}:${String(defaultTimeSeconds).padStart(2, '0')}`;
+  }
+  if (defaultExtraDisplay) {
+    defaultExtraDisplay.textContent = `${defaultExtraMinutes} phút`;
   }
 }
 
@@ -781,6 +967,17 @@ function updateDefaultTimeDisplay() {
   }
   if (defaultTimeDisplay) {
     defaultTimeDisplay.textContent = `${String(defaultTimeMinutes).padStart(2, '0')}:${String(defaultTimeSeconds).padStart(2, '0')}`;
+  }
+}
+
+function updateDefaultExtraDisplay() {
+  const defaultExtraMinutesInput = document.getElementById('defaultExtraMinutesInput');
+  const defaultExtraDisplay = document.getElementById('defaultExtraDisplay');
+  if (defaultExtraMinutesInput) {
+    defaultExtraMinutes = Number(defaultExtraMinutesInput.value);
+  }
+  if (defaultExtraDisplay) {
+    defaultExtraDisplay.textContent = `${defaultExtraMinutes} phút`;
   }
 }
 

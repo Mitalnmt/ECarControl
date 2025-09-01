@@ -87,16 +87,19 @@
 </head>
 <body>
   <!-- Main content -->
-  <div class="container mt-3">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-      <h3 class="mb-0">Danh sách xe cho thuê</h3>
-      <button class="btn btn-outline-secondary btn-sm" id="fullscreenBtn" title="Toàn màn hình">
-        <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-          <path d="M1.5 1a.5.5 0 0 0-.5.5v4a.5.5 0 0 1-.5.5h-1a.5.5 0 0 0 0 1H1v1a.5.5 0 0 0 1 0V7h1a.5.5 0 0 0 0-1H1V1.5a.5.5 0 0 0-.5-.5z"/>
-          <path d="M14.5 1a.5.5 0 0 1 .5.5v4a.5.5 0 0 0 .5.5h1a.5.5 0 0 1 0 1H16v1a.5.5 0 0 1-1 0V7h-1a.5.5 0 0 1 0-1h1V1.5a.5.5 0 0 1 .5-.5z"/>
-        </svg>
-      </button>
-    </div>
+      <div class="container mt-3">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h3 class="mb-0">Danh sách xe cho thuê</h3>
+        <div class="d-flex align-items-center gap-2">
+          <small class="text-muted" title="Ấn giữ vào dòng để mở menu thao tác">💡 Ấn giữ dòng để mở menu</small>
+          <button class="btn btn-outline-secondary btn-sm" id="fullscreenBtn" title="Toàn màn hình">
+            <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+              <path d="M1.5 1a.5.5 0 0 0-.5.5v4a.5.5 0 0 1-.5.5h-1a.5.5 0 0 0 0 1H1v1a.5.5 0 0 0 1 0V7h1a.5.5 0 0 0 0-1H1V1.5a.5.5 0 0 0-.5-.5z"/>
+              <path d="M14.5 1a.5.5 0 0 1 .5.5v4a.5.5 0 0 0 .5.5h1a.5.5 0 0 1 0 1H16v1a.5.5 0 0 1-1 0V7h-1a.5.5 0 0 1 0-1h1V1.5a.5.5 0 0 1 .5-.5z"/>
+            </svg>
+          </button>
+        </div>
+      </div>
     <table class="table table-striped" id="car-list">
       <thead>
         <tr>
@@ -215,6 +218,11 @@
           <button class="btn btn-success m-1" id="plus1Btn">+1 min</button>
           <button class="btn btn-success m-1" id="plus5Btn">+5 min</button>
           <button class="btn btn-secondary m-1" id="nullTimeBtn">Null</button>
+          <hr>
+          <div class="mt-2">
+            <button class="btn btn-info m-1" id="minusExtraBtn">-1 xuất</button>
+            <button class="btn btn-info m-1" id="plusExtraBtn">+1 xuất</button>
+          </div>
         </div>
       </div>
     </div>
@@ -242,6 +250,23 @@
               </div>
             </div>
             <small class="text-muted">Thời gian mặc định: <span id="defaultTimeDisplay">15:00</span></small>
+          </div>
+
+          <div class="mb-3">
+            <label for="defaultExtraInput" class="form-label">Thêm xuất mặc định:</label>
+            <div class="row">
+              <div class="col-6">
+                <label for="defaultExtraMinutesInput" class="form-label">Phút:</label>
+                <input type="number" class="form-control" id="defaultExtraMinutesInput" min="1" max="60" value="15">
+              </div>
+              <div class="col-6">
+                <label class="form-label">&nbsp;</label>
+                <div class="form-control-plaintext">
+                  <small class="text-muted">Thời gian xuất: <span id="defaultExtraDisplay">15 phút</span></small>
+                </div>
+              </div>
+            </div>
+            <small class="text-muted">Thời gian cộng/trừ khi ấn nút "-1 xuất" hoặc "+1 xuất"</small>
           </div>
 
           
