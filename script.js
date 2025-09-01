@@ -215,13 +215,14 @@ function renderCarList() {
 
     // Trạng thái
     const cell2 = row.insertCell(1);
-    // Nút trạng thái: 'C' (vàng) hoặc 'R' (xanh)
+    // Nút trạng thái: 'C' (vàng) hoặc 'R' (xanh) + nút Đổi cùng hàng
     const isPaid = car.paid;
-    cell2.innerHTML = `<button class="btn btn-status btn-sm ${isPaid ? 'btn-success' : 'btn-warning'}" onclick="togglePaid(${index})">${isPaid ? 'R' : 'C'}</button>`;
+    let statusHtml = `<button class="btn btn-status btn-sm ${isPaid ? 'btn-success' : 'btn-warning'}" onclick="togglePaid(${index})">${isPaid ? 'R' : 'C'}</button>`;
+    statusHtml += ` <button class="btn btn-secondary btn-sm" onclick="changeCarCode(${index})">Đổi</button>`;
     if (car.note) {
-      cell2.innerHTML += ` <span class='car-note'>${car.note}</span>`;
+      statusHtml += ` <span class='car-note'>${car.note}</span>`;
     }
-    cell2.innerHTML += `<br><button class="btn btn-secondary btn-sm" onclick="changeCarCode(${index})">Đổi</button>`;
+    cell2.innerHTML = statusHtml;
 
     // Mã xe mới + các mã xe cũ (nếu có)
     const cell3 = row.insertCell(2);
@@ -231,10 +232,20 @@ function renderCarList() {
     }
     cell3.innerHTML = carCodeHtml;
 
-    // Thời gian ra và vào (hiển thị cả hai)
+    // Thời gian ra và vào (hiển thị cả hai) - định dạng 12h không có AM/PM
     const cell4 = row.insertCell(3);
-    const timeOutFormatted = car.timeOut.toLocaleTimeString();
-    const timeInFormatted = car.timeIn.toLocaleTimeString();
+    const timeOutFormatted = car.timeOut.toLocaleTimeString('en-US', { 
+      hour: '2-digit', 
+      minute: '2-digit', 
+      second: '2-digit',
+      hour12: true 
+    }).replace(/[AP]M/g, '').trim();
+    const timeInFormatted = car.timeIn.toLocaleTimeString('en-US', { 
+      hour: '2-digit', 
+      minute: '2-digit', 
+      second: '2-digit',
+      hour12: true 
+    }).replace(/[AP]M/g, '').trim();
     cell4.innerHTML = `<div><span style='font-size:0.95em;'><b>${timeOutFormatted}</b></span><br><span style='font-size:0.9em;color:#2196f3;'><b>${timeInFormatted}</b></span></div>`;
 
     // Thời gian còn lại (hiển thị đếm ngược)
@@ -245,7 +256,7 @@ function renderCarList() {
     // Action buttons (các nút)
     const cell6 = row.insertCell(5); // Đây là cột thứ 6 (index 5)
     cell6.innerHTML = `
-      <button class="btn btn-success btn-sm" onclick="toggleDone(${index})">${car.done ? 'Resume' : 'Done'}</button>
+      <button class="btn btn-success btn-sm" onclick="toggleDone(${index})">${car.done ? 'Res' : 'Vào'}</button>
       <button class='btn btn-secondary btn-sm' onclick='openRowActionModal(${index})'>...</button>
     `;
 
@@ -446,7 +457,7 @@ function toggleDone(index) {
     // Cập nhật nút Resume/Done
     const btn = row.cells[5].querySelector('button.btn.btn-success');
     if (btn) {
-      btn.textContent = car.done ? 'Resume' : 'Done';
+      btn.textContent = car.done ? 'Res' : 'Vào';
     }
     // Cập nhật class dòng
     row.classList.remove('done', 'overdue', 'null-time-done');

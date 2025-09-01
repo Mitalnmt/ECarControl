@@ -44,7 +44,23 @@
 }
 
 #car-list .btn {
-  margin: 5px;
+  margin: 2px;
+}
+
+/* Styling cho nút Đổi khi nằm cùng hàng với nút R/C */
+#car-list td:nth-child(2) .btn {
+  margin: 1px;
+  font-size: 0.85em;
+  padding: 4px 8px;
+}
+
+/* Styling cho cột thời gian - giảm kích thước font */
+#car-list td:nth-child(4) {
+  font-size: 0.9em;
+}
+
+#car-list td:nth-child(4) span {
+  font-size: 0.85em;
 }
 
 #car-list .old-car-code-italic {
