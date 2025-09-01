@@ -118,7 +118,7 @@
   <div id="bottomBar" class="d-flex justify-content-between align-items-center px-3 py-2">
     <button class="btn btn-secondary" id="settingsBtn">Cài đặt</button>
     <button class="btn btn-primary" id="showModalBtn" data-bs-toggle="modal" data-bs-target="#carModal">Chọn Xe</button>
-    <div style="width: 80px;"></div> <!-- Spacer để cân bằng với nút Cài đặt -->
+    <button class="btn btn-info" id="selectMultipleBtn" data-bs-toggle="modal" data-bs-target="#selectMultipleModal">Chọn Nhiều</button>
   </div>
 
   <!-- Modal -->
@@ -305,6 +305,27 @@
     </div>
   </div>
 
+  <!-- Modal chọn nhiều xe -->
+  <div class="modal fade" id="selectMultipleModal" tabindex="-1" aria-labelledby="selectMultipleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="selectMultipleModalLabel">Chọn Nhiều Xe</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div id="multipleCarSelectionContainer">
+            <!-- Nội dung chọn xe sẽ được render ở đây -->
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+          <button type="button" class="btn btn-primary" id="addSelectedCarsBtn">Thêm xe đã chọn</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <div class="position-fixed top-0 end-0 p-3" style="z-index: 9999">
     <div id="overdueToast" class="toast align-items-center text-white bg-danger border-0" role="alert" aria-live="assertive" aria-atomic="true">
       <div class="d-flex">
@@ -335,5 +356,6 @@
   </script>
   <script src="script.js"></script>
   <script src="car-menu-editor.js"></script>
+  <script src="multiple-car-selection.js"></script>
 </body>
 </html>

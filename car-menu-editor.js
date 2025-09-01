@@ -53,12 +53,17 @@ class CarMenuEditor {
         if (typeof showToast === 'function') {
           showToast('Đã đồng bộ menu xe lên cloud!', 'success');
         }
+        // Cập nhật multiple car selection
+        this.updateMultipleCarSelection();
       }).catch((error) => {
         console.error('Lỗi khi lưu menu xe lên Firebase:', error);
         if (typeof showToast === 'function') {
           showToast('Lỗi khi đồng bộ menu xe!', 'danger');
         }
       });
+    } else {
+      // Cập nhật multiple car selection ngay cả khi không có Firebase
+      this.updateMultipleCarSelection();
     }
   }
 
@@ -340,6 +345,21 @@ class CarMenuEditor {
         modalBody.appendChild(groupDiv);
       }
     });
+
+    // Cập nhật multiple car selection nếu đang mở
+    this.updateMultipleCarSelection();
+  }
+
+  // Cập nhật multiple car selection
+  updateMultipleCarSelection() {
+    if (window.multipleCarSelection) {
+      window.multipleCarSelection.loadCarGroups();
+      // Nếu modal đang mở thì render lại
+      const modal = document.getElementById('selectMultipleModal');
+      if (modal && modal.classList.contains('show')) {
+        window.multipleCarSelection.renderSelectionInterface();
+      }
+    }
   }
 
   // Reset về cấu hình mặc định

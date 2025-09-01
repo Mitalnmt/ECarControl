@@ -215,14 +215,15 @@ function renderCarList() {
     const cell2 = row.insertCell(1);
     // Nút trạng thái: 'C' (vàng) hoặc 'R' (xanh)
     const isPaid = car.paid;
-    cell2.innerHTML = `<button class="btn btn-status ${isPaid ? 'btn-success' : 'btn-warning'}" onclick="togglePaid(${index})">${isPaid ? 'R' : 'C'}</button>`;
+    cell2.innerHTML = `<button class="btn btn-status btn-sm ${isPaid ? 'btn-success' : 'btn-warning'}" onclick="togglePaid(${index})">${isPaid ? 'R' : 'C'}</button>`;
     if (car.note) {
       cell2.innerHTML += ` <span class='car-note'>${car.note}</span>`;
     }
+    cell2.innerHTML += `<br><button class="btn btn-secondary btn-sm" onclick="changeCarCode(${index})">Đổi</button>`;
 
     // Mã xe mới + các mã xe cũ (nếu có)
     const cell3 = row.insertCell(2);
-    let carCodeHtml = `<span>${car.carCode}</span>`;
+    let carCodeHtml = `<span style="font-size: 1.2em; font-weight: bold;">${car.carCode}</span>`;
     if (car.oldCarCodes && car.oldCarCodes.length > 0) {
       carCodeHtml += ` <span class='old-car-code-italic'>(` + car.oldCarCodes.map(code => `${code}`).join(', ') + `)</span>`;
     }
@@ -232,7 +233,7 @@ function renderCarList() {
     const cell4 = row.insertCell(3);
     const timeOutFormatted = car.timeOut.toLocaleTimeString();
     const timeInFormatted = car.timeIn.toLocaleTimeString();
-    cell4.innerHTML = `<div><span style='font-size:0.95em;'>Ra: <b>${timeOutFormatted}</b></span><br><span style='font-size:0.9em;color:#2196f3;'>Vào: <b>${timeInFormatted}</b></span></div>`;
+    cell4.innerHTML = `<div><span style='font-size:0.95em;'><b>${timeOutFormatted}</b></span><br><span style='font-size:0.9em;color:#2196f3;'><b>${timeInFormatted}</b></span></div>`;
 
     // Thời gian còn lại (hiển thị đếm ngược)
     const cell5 = row.insertCell(4);
@@ -242,9 +243,8 @@ function renderCarList() {
     // Action buttons (các nút)
     const cell6 = row.insertCell(5); // Đây là cột thứ 6 (index 5)
     cell6.innerHTML = `
-      <button class="btn btn-success" onclick="toggleDone(${index})">${car.done ? 'Resume' : 'Done'}</button>
-      <button class="btn btn-warning" onclick="changeCarCode(${index})">Đổi xe</button>
-      <button class='btn btn-secondary' onclick='openRowActionModal(${index})'>...</button>
+      <button class="btn btn-success btn-sm" onclick="toggleDone(${index})">${car.done ? 'Resume' : 'Done'}</button>
+      <button class='btn btn-secondary btn-sm' onclick='openRowActionModal(${index})'>...</button>
     `;
 
     // Không render dòng phụ nữa
