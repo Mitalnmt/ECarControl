@@ -904,6 +904,12 @@ if (backBtn) {
     e.preventDefault(); // Ngăn chặn sự kiện mặc định
     e.stopPropagation(); // Ngăn chặn event bubbling
     undo();
+    // Đóng modal settings sau khi undo
+    const settingsModalEl = document.getElementById('settingsModal');
+    if (settingsModalEl) {
+      const modal = bootstrap.Modal.getInstance(settingsModalEl);
+      if (modal) modal.hide();
+    }
   });
 }
 
