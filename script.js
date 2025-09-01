@@ -544,6 +544,9 @@ loadSettings();
 renderCarList();
 updateCountdowns();
 
+// Xóa dữ liệu xe tạm thời cũ nếu có
+localStorage.removeItem('tempCars');
+
 // --- Xóa tất cả ---
 let confirmDeleteAllCount = 0;
 const deleteAllBtn = document.getElementById('deleteAllBtn');
@@ -692,6 +695,7 @@ if (rowActionNoteBtn) {
 // --- Cài đặt ---
 const settingsBtn = document.getElementById('settingsBtn');
 const saveSettingsBtn = document.getElementById('saveSettingsBtn');
+const exportCarsBtn = document.getElementById('exportCarsBtn');
 const settingsModalEl = document.getElementById('settingsModal');
 const defaultMinutesInput = document.getElementById('defaultMinutesInput');
 const defaultSecondsInput = document.getElementById('defaultSecondsInput');
@@ -709,6 +713,13 @@ if (saveSettingsBtn && settingsModal) {
   saveSettingsBtn.addEventListener('click', function() {
     saveSettings();
     settingsModal.hide();
+  });
+}
+
+// Event listener cho nút xuất danh sách xe
+if (exportCarsBtn) {
+  exportCarsBtn.addEventListener('click', function() {
+    exportCarList();
   });
 }
 if (defaultMinutesInput) {
@@ -773,66 +784,65 @@ function updateDefaultTimeDisplay() {
   }
 }
 
-// --- Xe tạm thời ---
-function getTempCars() {
-  const temp = localStorage.getItem('tempCars');
-  return temp ? JSON.parse(temp) : [];
-}
-function saveTempCars(tempCars) {
-  localStorage.setItem('tempCars', JSON.stringify(tempCars));
-}
-function addTempCar(code) {
-  let tempCars = getTempCars();
-  code = code.trim();
-  if (!code) return;
-  // Không thêm trùng
-  if (tempCars.includes(code)) return;
-  tempCars.push(code);
-  saveTempCars(tempCars);
-  renderTempCarButtons();
-}
-function renderTempCarButtons() {
-  // Tìm modal chọn xe
-  const modalBody = document.querySelector('#carModal .modal-body');
-  if (!modalBody) return;
-  // Xóa các nút xe tạm thời cũ
-  const oldTempDiv = document.getElementById('tempCarBtnGroup');
-  if (oldTempDiv) oldTempDiv.remove();
-  const tempCars = getTempCars();
-  if (tempCars.length === 0) return;
-  // Tạo nhóm nút mới
-  const div = document.createElement('div');
-  div.className = 'mb-2';
-  div.id = 'tempCarBtnGroup';
-  tempCars.forEach(code => {
-    const btn = document.createElement('button');
-    btn.className = 'btn btn-outline-primary m-1';
-    btn.textContent = code;
-    btn.onclick = function() { selectCarCode(code); };
-    div.appendChild(btn);
-  });
-  // Thêm vào đầu modal
-  modalBody.insertBefore(div, modalBody.firstChild);
-}
-// Gán sự kiện cho nút thêm xe tạm thời
-const addTempCarBtn = document.getElementById('addTempCarBtn');
-const tempCarInput = document.getElementById('tempCarInput');
-if (addTempCarBtn && tempCarInput) {
-  addTempCarBtn.onclick = function() {
-    addTempCar(tempCarInput.value);
-    tempCarInput.value = '';
-  };
-  tempCarInput.addEventListener('keydown', function(e) {
-    if (e.key === 'Enter') {
-      addTempCar(tempCarInput.value);
-      tempCarInput.value = '';
+// Hàm xuất danh sách xe
+function exportCarList() {
+  if (carList.length === 0) {
+    showToast('Không có xe nào để xuất!', 'warning');
+    return;
+  }
+
+  // Tạo nội dung để xuất
+  let exportContent = '=== DANH SÁCH XE HIỆN TẠI ===\n';
+  exportContent += `Thời gian xuất: ${new Date().toLocaleString('vi-VN')}\n`;
+  exportContent += `Tổng số xe: ${carList.length}\n\n`;
+
+  carList.forEach((car, index) => {
+    exportContent += `--- Xe ${index + 1} ---\n`;
+    exportContent += `ID: ${car.id}\n`;
+    exportContent += `Mã xe: ${car.carCode}\n`;
+    exportContent += `Thời gian ra: ${car.timeOut.toLocaleString('vi-VN')}\n`;
+    exportContent += `Thời gian vào: ${car.timeIn.toLocaleString('vi-VN')}\n`;
+    exportContent += `Trạng thái thanh toán: ${car.paid ? 'Đã thanh toán (R)' : 'Chưa thanh toán (C)'}\n`;
+    exportContent += `Trạng thái: ${car.done ? 'Đã hoàn thành' : 'Đang chạy'}\n`;
+    
+    if (car.oldCarCodes && car.oldCarCodes.length > 0) {
+      exportContent += `Mã xe cũ: ${car.oldCarCodes.join(', ')}\n`;
     }
+    
+    if (car.note) {
+      exportContent += `Ghi chú: ${car.note}\n`;
+    }
+    
+    if (car.isNullTime) {
+      exportContent += `Chế độ: Null time\n`;
+    }
+    
+    exportContent += '\n';
   });
+
+  // Tạo file để download
+  const blob = new Blob([exportContent], { type: 'text/plain;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `danh_sach_xe_${new Date().toISOString().slice(0, 19).replace(/:/g, '-')}.txt`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+
+  showToast('Đã xuất danh sách xe thành công!', 'success');
 }
-// Khi mở modal chọn xe, render lại xe tạm thời
+
+// Khi mở modal chọn xe, cập nhật menu xe từ car menu editor
 const carModalEl = document.getElementById('carModal');
 if (carModalEl) {
-  carModalEl.addEventListener('show.bs.modal', renderTempCarButtons);
+  carModalEl.addEventListener('show.bs.modal', function() {
+    // Cập nhật menu xe từ car menu editor
+    if (window.carMenuEditor) {
+      window.carMenuEditor.updateMainMenu();
+    }
+  });
 }
 
 // --- Cảnh báo xe hết thời gian ---
@@ -913,5 +923,46 @@ document.addEventListener('keydown', function(e) {
     e.preventDefault(); // Ngăn chặn hành vi mặc định của trình duyệt
     e.stopPropagation(); // Ngăn chặn event bubbling
     undo();
+  }
+});
+
+// --- Car Menu Editor Event Listeners ---
+document.addEventListener('DOMContentLoaded', function() {
+  // Mở car menu editor
+  const openCarMenuEditorBtn = document.getElementById('openCarMenuEditorBtn');
+  if (openCarMenuEditorBtn) {
+    openCarMenuEditorBtn.addEventListener('click', function() {
+      if (window.carMenuEditor) {
+        window.carMenuEditor.renderEditor();
+        const modal = bootstrap.Modal.getOrCreateInstance(document.getElementById('carMenuEditorModal'));
+        modal.show();
+      }
+    });
+  }
+
+  // Reset car menu về mặc định
+  const resetCarMenuBtn = document.getElementById('resetCarMenuBtn');
+  if (resetCarMenuBtn) {
+    resetCarMenuBtn.addEventListener('click', function() {
+      if (confirm('Bạn có chắc chắn muốn reset menu xe về mặc định? Tất cả thay đổi sẽ bị mất.')) {
+        if (window.carMenuEditor) {
+          window.carMenuEditor.resetToDefault();
+          showToast('Đã reset menu xe về mặc định!', 'success');
+        }
+      }
+    });
+  }
+
+  // Áp dụng thay đổi car menu
+  const applyCarMenuChangesBtn = document.getElementById('applyCarMenuChangesBtn');
+  if (applyCarMenuChangesBtn) {
+    applyCarMenuChangesBtn.addEventListener('click', function() {
+      if (window.carMenuEditor) {
+        window.carMenuEditor.updateMainMenu();
+        const modal = bootstrap.Modal.getInstance(document.getElementById('carMenuEditorModal'));
+        if (modal) modal.hide();
+        showToast('Đã áp dụng thay đổi menu xe!', 'success');
+      }
+    });
   }
 });

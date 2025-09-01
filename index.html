@@ -234,17 +234,20 @@
             </div>
             <small class="text-muted">Thời gian mặc định: <span id="defaultTimeDisplay">15:00</span></small>
           </div>
+
+          
           <div class="mb-3">
-            <label for="tempCarInput" class="form-label">Thêm xe tạm thời:</label>
-            <div class="input-group">
-              <input type="text" class="form-control" id="tempCarInput" placeholder="Nhập mã xe...">
-              <button class="btn btn-primary" id="addTempCarBtn" type="button">Thêm</button>
+            <label class="form-label">Chỉnh sửa Menu Xe:</label>
+            <div class="d-flex gap-2 mb-2">
+              <button class="btn btn-primary" id="openCarMenuEditorBtn">Mở Editor</button>
+              <button class="btn btn-warning" id="resetCarMenuBtn">Reset về mặc định</button>
             </div>
-            <small class="text-muted">Xe tạm thời sẽ xuất hiện trong danh sách chọn xe cho đến khi bạn xóa cache trình duyệt.</small>
+            <small class="text-muted">Chỉnh sửa các nhóm xe và thứ tự hiển thị trong menu chọn xe.</small>
           </div>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-warning" id="backBtn" title="Quay lại (Ctrl+Z)">← Back</button>
+          <button type="button" class="btn btn-info" id="exportCarsBtn">Xuất danh sách xe</button>
           <button type="button" class="btn btn-warning" id="enableNotifyBtn">Bật thông báo</button>
           <button type="button" class="btn btn-danger" id="deleteAllBtn">Xóa tất cả</button>
           <button type="button" class="btn btn-danger" id="logoutBtn">Đăng xuất</button>
@@ -267,6 +270,27 @@
           <button class="btn btn-info m-2" id="rowActionTimeBtn">Time</button>
           <button class="btn btn-danger m-2" id="rowActionDeleteBtn">Xóa</button>
           <button class="btn btn-secondary m-2" id="rowActionNoteBtn">Ghi chú</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal chỉnh sửa menu xe -->
+  <div class="modal fade" id="carMenuEditorModal" tabindex="-1" aria-labelledby="carMenuEditorModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="carMenuEditorModalLabel">Chỉnh sửa Menu Xe</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div id="carMenuEditorContainer">
+            <!-- Nội dung editor sẽ được render ở đây -->
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+          <button type="button" class="btn btn-primary" id="applyCarMenuChangesBtn">Áp dụng thay đổi</button>
         </div>
       </div>
     </div>
@@ -301,5 +325,6 @@
     window.db = firebase.database();
   </script>
   <script src="script.js"></script>
+  <script src="car-menu-editor.js"></script>
 </body>
 </html>
