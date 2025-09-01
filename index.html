@@ -221,7 +221,7 @@
     <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#carModal">
       <i class="fas fa-car"></i> Chọn Xe
     </button>
-    <button class="btn btn-info btn-sm" id="exportCarsBtn">Xuất danh sách</button>
+    <button class="btn btn-info btn-sm" data-bs-toggle="modal" data-bs-target="#selectMultipleModal">Chọn Nhiều</button>
   </div>
 
   <!-- Virtual spacer to prevent content from being hidden behind floating bottom bar -->
@@ -358,6 +358,14 @@
               <button class="btn btn-warning" id="resetCarMenuBtn">Reset về mặc định</button>
             </div>
             <small class="text-muted">Chỉnh sửa các nhóm xe và thứ tự hiển thị trong menu chọn xe.</small>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Chức năng nhanh:</label>
+            <div class="d-flex gap-2 mb-2">
+              <button class="btn btn-info" data-bs-toggle="modal" data-bs-target="#selectMultipleModal">Chọn Nhiều Xe</button>
+            </div>
+            <small class="text-muted">Truy cập nhanh các chức năng chính.</small>
           </div>
         </div>
         <div class="modal-footer">
