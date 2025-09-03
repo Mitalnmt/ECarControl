@@ -316,11 +316,19 @@
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body text-center">
-          <button class="btn btn-danger m-1" id="minus5Btn">-5 min</button>
-          <button class="btn btn-warning m-1" id="minus1Btn">-1 min</button>
-          <button class="btn btn-success m-1" id="plus1Btn">+1 min</button>
-          <button class="btn btn-success m-1" id="plus5Btn">+5 min</button>
-          <button class="btn btn-secondary m-1" id="nullTimeBtn">Null</button>
+          <div class="mb-2">
+            <button class="btn btn-danger m-1" id="minus5Btn">-5 min</button>
+            <button class="btn btn-warning m-1" id="minus1Btn">-1 min</button>
+            <button class="btn btn-success m-1" id="plus1Btn">+1 min</button>
+            <button class="btn btn-success m-1" id="plus5Btn">+5 min</button>
+          </div>
+          <div class="mb-2">
+            <button class="btn btn-outline-danger m-1" id="minusXBtn">-1x</button>
+            <button class="btn btn-outline-success m-1" id="plusXBtn">+1x</button>
+          </div>
+          <div>
+            <button class="btn btn-secondary m-1" id="nullTimeBtn">Null</button>
+          </div>
         </div>
       </div>
     </div>
@@ -348,6 +356,12 @@
               </div>
             </div>
             <small class="text-muted">Thời gian mặc định: <span id="defaultTimeDisplay">15:00</span></small>
+          </div>
+
+          <div class="mb-3">
+            <label for="xStepMinutesInput" class="form-label">Bước tăng/giảm cho nút -1x/+1x (phút):</label>
+            <input type="number" class="form-control" id="xStepMinutesInput" min="1" max="180" value="15">
+            <small class="text-muted">Ví dụ: 15 sẽ là -15 phút và +15 phút.</small>
           </div>
 
           

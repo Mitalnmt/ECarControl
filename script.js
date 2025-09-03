@@ -3,6 +3,7 @@ let carIdCounter = 1;
 let changeCarIndex = null; // null: chọn xe mới, số: đổi mã xe
 let defaultTimeMinutes = 15; // Thời gian mặc định (phút)
 let defaultTimeSeconds = 30; // Thời gian mặc định (giây)
+let xStepMinutes = 15; // Bước tăng/giảm cho nút -1x/+1x (phút)
 
 // Biến cho chức năng undo
 let undoHistory = []; // Lưu lịch sử các thao tác
@@ -615,6 +616,8 @@ const minus1Btn = document.getElementById('minus1Btn');
 const plus1Btn = document.getElementById('plus1Btn');
 const plus5Btn = document.getElementById('plus5Btn');
 const nullTimeBtn = document.getElementById('nullTimeBtn');
+const minusXBtn = document.getElementById('minusXBtn');
+const plusXBtn = document.getElementById('plusXBtn');
 
 function openTimeModal(index) {
   currentTimeIndex = index;
@@ -669,6 +672,16 @@ if (nullTimeBtn) {
     saveCarListToStorage(false);
     // renderCarList(); // BỎ
     if (timeModal) timeModal.hide();
+  };
+}
+if (minusXBtn) {
+  minusXBtn.onclick = () => {
+    changeTimeByDelta(-xStepMinutes);
+  };
+}
+if (plusXBtn) {
+  plusXBtn.onclick = () => {
+    changeTimeByDelta(xStepMinutes);
   };
 }
 
@@ -727,6 +740,7 @@ const exportCarsBtn = document.getElementById('exportCarsBtn');
 const settingsModalEl = document.getElementById('settingsModal');
 const defaultMinutesInput = document.getElementById('defaultMinutesInput');
 const defaultSecondsInput = document.getElementById('defaultSecondsInput');
+const xStepMinutesInput = document.getElementById('xStepMinutesInput');
 let settingsModal = null;
 if (settingsModalEl) {
   settingsModal = bootstrap.Modal.getOrCreateInstance(settingsModalEl);
@@ -756,19 +770,32 @@ if (defaultMinutesInput) {
 if (defaultSecondsInput) {
   defaultSecondsInput.addEventListener('input', updateDefaultTimeDisplay);
 }
+if (xStepMinutesInput) {
+  xStepMinutesInput.addEventListener('input', function() {
+    const val = Number(xStepMinutesInput.value);
+    if (!Number.isNaN(val) && val > 0) {
+      xStepMinutes = val;
+    }
+  });
+}
 
 function loadSettings() {
   const savedDefaultTime = localStorage.getItem('defaultTimeMinutes');
   const savedDefaultSeconds = localStorage.getItem('defaultTimeSeconds');
+  const savedXStep = localStorage.getItem('xStepMinutes');
   if (savedDefaultTime) {
     defaultTimeMinutes = Number(savedDefaultTime);
   }
   if (savedDefaultSeconds) {
     defaultTimeSeconds = Number(savedDefaultSeconds);
   }
+  if (savedXStep) {
+    xStepMinutes = Number(savedXStep);
+  }
   const defaultMinutesInput = document.getElementById('defaultMinutesInput');
   const defaultSecondsInput = document.getElementById('defaultSecondsInput');
   const defaultTimeDisplay = document.getElementById('defaultTimeDisplay');
+  const xStepMinutesInput = document.getElementById('xStepMinutesInput');
   if (defaultMinutesInput) {
     defaultMinutesInput.value = defaultTimeMinutes;
   }
@@ -778,11 +805,15 @@ function loadSettings() {
   if (defaultTimeDisplay) {
     defaultTimeDisplay.textContent = `${String(defaultTimeMinutes).padStart(2, '0')}:${String(defaultTimeSeconds).padStart(2, '0')}`;
   }
+  if (xStepMinutesInput) {
+    xStepMinutesInput.value = xStepMinutes;
+  }
 }
 
 function saveSettings() {
   const defaultMinutesInput = document.getElementById('defaultMinutesInput');
   const defaultSecondsInput = document.getElementById('defaultSecondsInput');
+  const xStepMinutesInput = document.getElementById('xStepMinutesInput');
   if (defaultMinutesInput) {
     defaultTimeMinutes = Number(defaultMinutesInput.value);
     localStorage.setItem('defaultTimeMinutes', defaultTimeMinutes);
@@ -790,6 +821,10 @@ function saveSettings() {
   if (defaultSecondsInput) {
     defaultTimeSeconds = Number(defaultSecondsInput.value);
     localStorage.setItem('defaultTimeSeconds', defaultTimeSeconds);
+  }
+  if (xStepMinutesInput) {
+    xStepMinutes = Math.max(1, Number(xStepMinutesInput.value) || xStepMinutes);
+    localStorage.setItem('xStepMinutes', xStepMinutes);
   }
   const defaultTimeDisplay = document.getElementById('defaultTimeDisplay');
   if (defaultTimeDisplay) {
