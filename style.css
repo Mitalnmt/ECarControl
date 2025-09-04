@@ -254,19 +254,7 @@ body {
   z-index: 2;
 }
 
-/* Robust red border per cell for selected rows */
+/* Strong per-cell red border for selected rows */
 #car-list tbody tr.row-selected td {
-  position: relative;
-}
-#car-list tbody tr.row-selected td::after {
-  content: '';
-  position: absolute;
-  top: 1px;
-  right: 1px;
-  bottom: 1px;
-  left: 1px;
-  border: 2px solid #ff3b30;
-  pointer-events: none;
-  border-radius: 3px;
-  z-index: 3;
+  box-shadow: inset 0 0 0 2px #ff3b30 !important;
 }
