@@ -191,10 +191,12 @@ function renderCarList() {
   const tbody = document.getElementById('car-list').getElementsByTagName('tbody')[0];
   tbody.innerHTML = '';  // Xóa các dòng cũ
 
-  // Đếm số lượng xe theo mã xe (không phân biệt trạng thái)
+  // Đếm số lượng xe theo mã xe (chỉ đếm xe chưa được ấn vào)
   const countByCode = {};
   carList.forEach(car => {
-    countByCode[car.carCode] = (countByCode[car.carCode] || 0) + 1;
+    if (!car.done) { // Chỉ đếm xe chưa được ấn vào (chưa có done = true)
+      countByCode[car.carCode] = (countByCode[car.carCode] || 0) + 1;
+    }
   });
 
   carList.forEach((car, index) => {
@@ -219,8 +221,8 @@ function renderCarList() {
     } else if (getRemainingTimeInMillis(car.timeIn, car) <= 0) {
       row.classList.add('overdue');
     }
-    // Nếu mã xe bị trùng, thêm class duplicate-done
-    if (countByCode[car.carCode] >= 2) {
+    // Nếu mã xe bị trùng VÀ xe chưa được ấn vào, thêm class duplicate-done
+    if (!car.done && countByCode[car.carCode] >= 2) {
       row.classList.add('duplicate-done');
     }
     // Nếu đang được chọn
