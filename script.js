@@ -561,10 +561,14 @@ function updateSelectionBar() {
   const bar = document.getElementById('selectionBar');
   const countEl = document.getElementById('selectionCount');
   const deleteBtn = document.getElementById('selectionDeleteBtn');
+  const timeBtn = document.getElementById('selectionTimeBtn');
+  const noteBtn = document.getElementById('selectionNoteBtn');
   if (!bar || !countEl || !deleteBtn) return;
   if (!multiSelectMode) {
     bar.style.display = 'none';
     deleteBtn.disabled = true;
+    if (timeBtn) timeBtn.disabled = true;
+    if (noteBtn) noteBtn.disabled = true;
     const table = document.getElementById('car-list');
     if (table) table.classList.remove('select-mode');
     return;
@@ -574,10 +578,110 @@ function updateSelectionBar() {
   if (count > 0) {
     bar.style.display = 'flex';
     deleteBtn.disabled = false;
+    if (timeBtn) timeBtn.disabled = false;
+    if (noteBtn) noteBtn.disabled = false;
   } else {
     bar.style.display = 'none';
     deleteBtn.disabled = true;
+    if (timeBtn) timeBtn.disabled = true;
+    if (noteBtn) noteBtn.disabled = true;
   }
+}
+
+// --- Chức năng chỉnh thời gian nhiều xe ---
+function editTimeForSelectedCars() {
+  if (selectedIds.size === 0) return;
+  
+  const multiTimeModal = bootstrap.Modal.getOrCreateInstance(document.getElementById('multiTimeModal'));
+  const countEl = document.getElementById('multiTimeCount');
+  if (countEl) countEl.textContent = selectedIds.size;
+  
+  multiTimeModal.show();
+}
+
+function changeMultiTime(deltaMinutes) {
+  if (selectedIds.size === 0) return;
+  
+  let changedCount = 0;
+  selectedIds.forEach(id => {
+    const index = carList.findIndex(car => car.id === id);
+    if (index !== -1) {
+      const car = carList[index];
+      if (car.isNullTime) car.isNullTime = false; // Bỏ null khi chỉnh lại
+      
+      const newTimeIn = new Date(car.timeIn);
+      newTimeIn.setMinutes(newTimeIn.getMinutes() + deltaMinutes);
+      
+      // Kiểm tra nếu thời gian vào không được phép nhỏ hơn thời gian ra
+      if (newTimeIn >= car.timeOut) {
+        car.timeIn = newTimeIn;
+        changedCount++;
+      }
+    }
+  });
+  
+  if (changedCount > 0) {
+    saveCarListToStorage(false);
+    renderCarList();
+    showToast(`Đã chỉnh thời gian cho ${changedCount} xe!`, 'success');
+  } else {
+    showToast('Không thể chỉnh thời gian vì thời gian vào sẽ nhỏ hơn thời gian ra!', 'warning');
+  }
+}
+
+function setMultiTimeNull() {
+  if (selectedIds.size === 0) return;
+  
+  selectedIds.forEach(id => {
+    const index = carList.findIndex(car => car.id === id);
+    if (index !== -1) {
+      carList[index].isNullTime = true;
+    }
+  });
+  
+  saveCarListToStorage(false);
+  renderCarList();
+  showToast(`Đã đặt Null cho ${selectedIds.size} xe!`, 'success');
+}
+
+// --- Chức năng ghi chú nhiều xe ---
+function editNoteForSelectedCars() {
+  if (selectedIds.size === 0) return;
+  
+  const multiNoteModal = bootstrap.Modal.getOrCreateInstance(document.getElementById('multiNoteModal'));
+  const countEl = document.getElementById('multiNoteCount');
+  const noteInput = document.getElementById('multiNoteInput');
+  
+  if (countEl) countEl.textContent = selectedIds.size;
+  if (noteInput) noteInput.value = '';
+  
+  multiNoteModal.show();
+}
+
+function applyMultiNote() {
+  if (selectedIds.size === 0) return;
+  
+  const noteInput = document.getElementById('multiNoteInput');
+  if (!noteInput) return;
+  
+  const note = noteInput.value.trim();
+  let changedCount = 0;
+  
+  selectedIds.forEach(id => {
+    const index = carList.findIndex(car => car.id === id);
+    if (index !== -1) {
+      carList[index].note = note;
+      changedCount++;
+    }
+  });
+  
+  saveCarListToStorage(false);
+  renderCarList();
+  showToast(`Đã cập nhật ghi chú cho ${changedCount} xe!`, 'success');
+  
+  // Đóng modal
+  const multiNoteModal = bootstrap.Modal.getOrCreateInstance(document.getElementById('multiNoteModal'));
+  multiNoteModal.hide();
 }
 
 // --- Lưu trữ Firebase Realtime Database ---

@@ -184,6 +184,51 @@
         padding-bottom: 50px;
       }
     }
+
+    /* Modal cài đặt - responsive cho mobile */
+    @media (max-width: 768px) {
+      #settingsModal .modal-dialog {
+        margin: 10px;
+        margin-bottom: 80px; /* Tạo khoảng cách với bottomBar */
+        max-height: calc(100vh - 90px); /* Giới hạn chiều cao */
+      }
+      
+      #settingsModal .modal-content {
+        max-height: calc(100vh - 100px);
+        overflow-y: auto;
+      }
+      
+      #settingsModal .modal-footer {
+        flex-wrap: wrap;
+        gap: 5px;
+        padding: 10px;
+      }
+      
+      #settingsModal .modal-footer .btn {
+        flex: 1;
+        min-width: calc(50% - 5px);
+        margin: 2px 0;
+        font-size: 0.85rem;
+        padding: 6px 8px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      #settingsModal .modal-dialog {
+        margin: 5px;
+        margin-bottom: 70px; /* Tăng khoảng cách cho màn hình nhỏ hơn */
+        max-height: calc(100vh - 80px);
+      }
+      
+      #settingsModal .modal-content {
+        max-height: calc(100vh - 90px);
+      }
+      
+      #settingsModal .modal-footer .btn {
+        font-size: 0.8rem;
+        padding: 5px 6px;
+      }
+    }
   </style>
   <link rel="stylesheet" href="style.css">
 </head>
@@ -237,6 +282,8 @@
       <div class="d-flex gap-2">
         <button class="btn btn-sm btn-outline-secondary" onclick="clearSelection()">Bỏ chọn</button>
         <button class="btn btn-sm btn-outline-primary" onclick="selectAllRows()">Chọn tất cả</button>
+        <button class="btn btn-sm btn-info" id="selectionTimeBtn" onclick="editTimeForSelectedCars()" disabled>Chỉnh thời gian</button>
+        <button class="btn btn-sm btn-secondary" id="selectionNoteBtn" onclick="editNoteForSelectedCars()" disabled>Ghi chú</button>
         <button class="btn btn-sm btn-danger" id="selectionDeleteBtn" onclick="deleteSelectedRows()" disabled>Xóa đã chọn</button>
       </div>
     </div>
@@ -370,13 +417,11 @@
                 <input type="number" class="form-control" id="defaultSecondsInput" min="0" max="59" value="0">
               </div>
             </div>
-            <small class="text-muted">Thời gian mặc định: <span id="defaultTimeDisplay">15:00</span></small>
           </div>
 
           <div class="mb-3">
             <label for="xStepMinutesInput" class="form-label">Bước tăng/giảm cho nút -1x/+1x (phút):</label>
             <input type="number" class="form-control" id="xStepMinutesInput" min="1" max="180" value="15">
-            <small class="text-muted">Ví dụ: 15 sẽ là -15 phút và +15 phút.</small>
           </div>
 
           
@@ -386,19 +431,16 @@
               <button class="btn btn-primary" id="openCarMenuEditorBtn">Mở Editor</button>
               <button class="btn btn-warning" id="resetCarMenuBtn">Reset về mặc định</button>
             </div>
-            <small class="text-muted">Chỉnh sửa các nhóm xe và thứ tự hiển thị trong menu chọn xe.</small>
           </div>
 
           <div class="mb-3">
             <label class="form-label">Chức năng nhanh:</label>
             <div class="d-flex gap-2 mb-2">
             </div>
-            <small class="text-muted">Truy cập nhanh các chức năng chính.</small>
           </div>
 
           <div class="mb-3">
-            <button class="btn btn-outline-primary" id="activateMultiSelectBtn">Chọn dòng</button>
-            <small class="text-muted d-block mt-1">Bấm để bật chế độ chọn dòng và xóa nhiều. Sau khi xóa xong, chế độ sẽ tự tắt. Muốn dùng lại, bấm nút này lần nữa.</small>
+            <button class="btn btn-outline-primary" id="activateMultiSelectBtn">Chọn nhiều dòng</button>
           </div>
         </div>
         <div class="modal-footer">
@@ -468,6 +510,60 @@
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
           <button type="button" class="btn btn-primary" id="addSelectedCarsBtn">Thêm xe đã chọn</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal chỉnh thời gian nhiều xe -->
+  <div class="modal fade" id="multiTimeModal" tabindex="-1" aria-labelledby="multiTimeModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="multiTimeModalLabel">Chỉnh thời gian nhiều xe</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body text-center">
+          <p class="mb-3">Đã chọn <span id="multiTimeCount">0</span> xe</p>
+          <div class="mb-2">
+            <button class="btn btn-danger m-1" onclick="changeMultiTime(-5)">-5 min</button>
+            <button class="btn btn-warning m-1" onclick="changeMultiTime(-1)">-1 min</button>
+            <button class="btn btn-success m-1" onclick="changeMultiTime(1)">+1 min</button>
+            <button class="btn btn-success m-1" onclick="changeMultiTime(5)">+5 min</button>
+          </div>
+          <div class="mb-2">
+            <button class="btn btn-outline-danger m-1" onclick="changeMultiTime(-xStepMinutes)">-1x</button>
+            <button class="btn btn-outline-success m-1" onclick="changeMultiTime(xStepMinutes)">+1x</button>
+          </div>
+          <div>
+            <button class="btn btn-secondary m-1" onclick="setMultiTimeNull()">Đặt Null</button>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal ghi chú nhiều xe -->
+  <div class="modal fade" id="multiNoteModal" tabindex="-1" aria-labelledby="multiNoteModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="multiNoteModalLabel">Ghi chú nhiều xe</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <p class="mb-3">Đã chọn <span id="multiNoteCount">0</span> xe</p>
+          <div class="mb-3">
+            <label for="multiNoteInput" class="form-label">Ghi chú:</label>
+            <textarea class="form-control" id="multiNoteInput" rows="3" placeholder="Nhập ghi chú cho tất cả xe đã chọn..."></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+          <button type="button" class="btn btn-primary" onclick="applyMultiNote()">Áp dụng</button>
         </div>
       </div>
     </div>
