@@ -69,6 +69,27 @@
   color: #90a4ae !important;
 }
 
+/* Row selected - red outline */
+#car-list tr.row-selected td {
+  background-color: transparent !important;
+  box-shadow: none !important;
+  border-top: 2px solid #ff3b30 !important; /* iOS red */
+  border-bottom: 2px solid #ff3b30 !important;
+}
+#car-list tr.row-selected td:first-child {
+  border-left: 2px solid #ff3b30 !important;
+}
+#car-list tr.row-selected td:last-child {
+  border-right: 2px solid #ff3b30 !important;
+}
+#car-list tr.row-selected td:first-child::before {
+  content: none !important; /* remove previous blue strip */
+}
+/* Con trỏ khi ở chế độ chọn dòng */
+#car-list.select-mode tbody tr td {
+  cursor: pointer;
+}
+
 #car-list input[type="checkbox"] {
   width: 1.5em;
   height: 1.5em;
@@ -214,4 +235,26 @@ body {
     min-width: 70px;
     padding: 10px 15px;
   }
+}
+
+/* Red overlay border for selected rows */
+#car-list tbody tr.row-selected {
+  position: relative;
+}
+#car-list tbody tr.row-selected::after {
+  content: '';
+  position: absolute;
+  top: -2px;
+  bottom: -2px;
+  left: 0;
+  right: 0;
+  border: 2px solid #ff3b30;
+  border-radius: 4px;
+  pointer-events: none;
+  z-index: 2;
+}
+
+/* Strong per-cell red border for selected rows */
+#car-list tbody tr.row-selected td {
+  box-shadow: inset 0 0 0 2px #ff3b30 !important;
 }

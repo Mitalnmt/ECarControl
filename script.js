@@ -5,6 +5,10 @@ let defaultTimeMinutes = 15; // Thời gian mặc định (phút)
 let defaultTimeSeconds = 30; // Thời gian mặc định (giây)
 let xStepMinutes = 15; // Bước tăng/giảm cho nút -1x/+1x (phút)
 
+// Trạng thái chọn nhiều dòng
+let selectedIds = new Set();
+let multiSelectMode = false; // Bật/tắt chọn nhiều bằng click dòng (kích hoạt 1 lần)
+
 // Biến cho chức năng undo
 let undoHistory = []; // Lưu lịch sử các thao tác
 let maxUndoSteps = 20; // Số bước undo tối đa
@@ -197,6 +201,16 @@ function renderCarList() {
     // Dòng chính
     const row = tbody.insertRow();
 
+    // Toggle chọn dòng khi click nền dòng (bỏ qua click vào các nút bên trong)
+    row.addEventListener('click', function(e) {
+      if (!multiSelectMode) return;
+      const target = e.target;
+      if (target.closest('button') || target.closest('input') || target.closest('a') || target.closest('.btn')) {
+        return;
+      }
+      handleRowClick(car.id, row);
+    });
+
     // Kiểm tra trạng thái để set class
     if (car.isNullTime) {
       row.classList.add('null-time-done');
@@ -208,6 +222,10 @@ function renderCarList() {
     // Nếu mã xe bị trùng, thêm class duplicate-done
     if (countByCode[car.carCode] >= 2) {
       row.classList.add('duplicate-done');
+    }
+    // Nếu đang được chọn
+    if (selectedIds.has(car.id)) {
+      row.classList.add('row-selected');
     }
 
     // Số thứ tự
@@ -276,6 +294,9 @@ function renderCarList() {
     spacerCell.style.border = 'none';
     spacerCell.style.background = 'transparent';
   }
+
+  // Cập nhật thanh chọn nhiều
+  updateSelectionBar();
 
   // setTimeout(updateCountdowns, 1000); // BỎ, sẽ gọi ở ngoài
 }
@@ -349,7 +370,7 @@ function updateCountdowns() {
         if (countdownCell) {
           countdownCell.innerHTML = `<span class="countdown">${getRemainingTime(carList[i].timeIn, carList[i])}</span>`;
         }
-        row.classList.remove('done', 'overdue', 'null-time-done');
+        row.classList.remove('done', 'overdue', 'null-time-done', 'row-selected');
         const car = carList[i];
         if (car.isNullTime) {
           row.classList.add('null-time-done');
@@ -357,6 +378,9 @@ function updateCountdowns() {
           row.classList.add('done');
         } else if (getRemainingTimeInMillis(car.timeIn, car) <= 0) {
           row.classList.add('overdue');
+        }
+        if (selectedIds.has(car.id)) {
+          row.classList.add('row-selected');
         }
       }
     }
@@ -480,6 +504,78 @@ function deleteCar(index) {
   carList.splice(index, 1);
   saveCarListToStorage(false);
   // renderCarList(); // BỎ
+}
+
+// Chọn/bỏ chọn dòng theo click
+function handleRowClick(carId, rowEl) {
+  if (!multiSelectMode) return;
+  if (selectedIds.has(carId)) {
+    selectedIds.delete(carId);
+    if (rowEl) rowEl.classList.remove('row-selected');
+  } else {
+    selectedIds.add(carId);
+    if (rowEl) rowEl.classList.add('row-selected');
+  }
+  updateSelectionBar();
+}
+
+// Chọn tất cả dòng hiện có
+function selectAllRows() {
+  carList.forEach(c => selectedIds.add(c.id));
+  renderCarList();
+  updateSelectionBar();
+}
+
+// Bỏ chọn tất cả
+function clearSelection() {
+  selectedIds.clear();
+  renderCarList();
+  // Tắt luôn chế độ chọn dòng khi bấm Bỏ chọn
+  multiSelectMode = false;
+  const table = document.getElementById('car-list');
+  if (table) table.classList.remove('select-mode');
+  updateSelectionBar();
+}
+
+// Xóa các dòng đã chọn
+function deleteSelectedRows() {
+  if (selectedIds.size === 0) return;
+  if (!confirm(`Bạn có chắc chắn muốn xóa ${selectedIds.size} dòng đã chọn?`)) return;
+  carList = carList.filter(c => !selectedIds.has(c.id));
+  selectedIds.clear();
+  saveCarListToStorage(false);
+  renderCarList();
+  updateSelectionBar();
+  showToast('Đã xóa các dòng đã chọn!', 'success');
+  // Tự tắt chế độ chọn nhiều sau khi xóa
+  multiSelectMode = false;
+  const table = document.getElementById('car-list');
+  if (table) table.classList.remove('select-mode');
+  updateSelectionBar();
+}
+
+// Cập nhật thanh tác vụ chọn nhiều
+function updateSelectionBar() {
+  const bar = document.getElementById('selectionBar');
+  const countEl = document.getElementById('selectionCount');
+  const deleteBtn = document.getElementById('selectionDeleteBtn');
+  if (!bar || !countEl || !deleteBtn) return;
+  if (!multiSelectMode) {
+    bar.style.display = 'none';
+    deleteBtn.disabled = true;
+    const table = document.getElementById('car-list');
+    if (table) table.classList.remove('select-mode');
+    return;
+  }
+  const count = selectedIds.size;
+  countEl.textContent = count;
+  if (count > 0) {
+    bar.style.display = 'flex';
+    deleteBtn.disabled = false;
+  } else {
+    bar.style.display = 'none';
+    deleteBtn.disabled = true;
+  }
 }
 
 // --- Lưu trữ Firebase Realtime Database ---
@@ -741,6 +837,7 @@ const settingsModalEl = document.getElementById('settingsModal');
 const defaultMinutesInput = document.getElementById('defaultMinutesInput');
 const defaultSecondsInput = document.getElementById('defaultSecondsInput');
 const xStepMinutesInput = document.getElementById('xStepMinutesInput');
+const activateMultiSelectBtn = document.getElementById('activateMultiSelectBtn');
 let settingsModal = null;
 if (settingsModalEl) {
   settingsModal = bootstrap.Modal.getOrCreateInstance(settingsModalEl);
@@ -755,6 +852,20 @@ if (saveSettingsBtn && settingsModal) {
   saveSettingsBtn.addEventListener('click', function() {
     saveSettings();
     settingsModal.hide();
+  });
+}
+
+// Kích hoạt chế độ chọn dòng một lần
+if (activateMultiSelectBtn) {
+  activateMultiSelectBtn.addEventListener('click', function() {
+    multiSelectMode = true;
+    selectedIds.clear();
+    updateSelectionBar();
+    renderCarList();
+    const table = document.getElementById('car-list');
+    if (table) table.classList.add('select-mode');
+    if (settingsModal) settingsModal.hide();
+    showToast('Đã bật chế độ chọn dòng. Chạm vào dòng để chọn/xóa.', 'info');
   });
 }
 
