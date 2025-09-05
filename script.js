@@ -159,7 +159,7 @@ if (showModalBtn) {
 }
 
 // Thêm xe vào danh sách
-function addCar(carCode) {
+function addCar(carCode, options = {}) {
   const now = new Date();
   const timeOut = new Date(now.getTime());  // Thời gian ra là thời gian hiện tại
   const timeIn = new Date(timeOut.getTime());  // Thời gian vào là 15 phút sau thời gian ra
@@ -174,6 +174,7 @@ function addCar(carCode) {
     paid: false,
     done: false,
     timeChanged: "",  // Lưu giá trị cộng trừ
+    groupColor: options.groupColor || undefined,
   };
 
   carList.push(car);
@@ -235,7 +236,8 @@ function renderCarList() {
 
     // Mã xe mới + các mã xe cũ (nếu có)
     const cell3 = row.insertCell(2);
-    let carCodeHtml = `<span style="font-size: 1.2em; font-weight: bold;">${car.carCode}</span>`;
+    const codeColorStyle = car.groupColor ? `color:${car.groupColor};` : '';
+    let carCodeHtml = `<span style="font-size: 1.2em; font-weight: bold; ${codeColorStyle}">${car.carCode}</span>`;
     if (car.oldCarCodes && car.oldCarCodes.length > 0) {
       carCodeHtml += ` <span class='old-car-code-italic'>(` + car.oldCarCodes.map(code => `${code}`).join(', ') + `)</span>`;
     }

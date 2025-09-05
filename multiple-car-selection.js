@@ -3,6 +3,8 @@ class MultipleCarSelection {
   constructor() {
     this.selectedCars = new Set(); // Lưu các xe đã chọn
     this.carGroups = []; // Lưu cấu hình menu xe từ car menu editor
+    this.groupColorPalette = ['#1e88e5', '#d81b60', '#43a047', '#8e24aa', '#fb8c00', '#00897b', '#5e35b1', '#f4511e'];
+    this.nextGroupColorIndex = 0;
     this.init();
   }
 
@@ -186,10 +188,21 @@ class MultipleCarSelection {
       return;
     }
 
-    // Thêm từng xe đã chọn
+    let applyGroupColor = false;
+    if (this.selectedCars.size > 1) {
+      applyGroupColor = confirm('Các xe này đi chung với nhau?');
+    }
+
+    let colorForGroup;
+    if (applyGroupColor) {
+      colorForGroup = this.groupColorPalette[this.nextGroupColorIndex % this.groupColorPalette.length];
+      this.nextGroupColorIndex++;
+    }
+
+    // Thêm từng xe đã chọn, kèm màu nhóm nếu có
     this.selectedCars.forEach(carCode => {
       if (typeof addCar === 'function') {
-        addCar(carCode);
+        addCar(carCode, { groupColor: colorForGroup });
       }
     });
 
