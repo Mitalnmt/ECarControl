@@ -18,12 +18,42 @@
 }
 
 .duplicate-done {
-  animation: blink-yellow 1s infinite alternate;
+  animation: none !important;
   background-color: #fff8b0 !important;
 }
 @keyframes blink-yellow {
   from { background-color: #fff8b0; }
   to { background-color: #ffe066; }
+}
+
+/* Xe vừa bị trùng vừa hết thời gian - nhấp nháy giữa vàng và đỏ */
+.duplicate-overdue {
+  background-color: #fff8b0 !important;
+  animation: none !important;
+}
+
+@keyframes blink-yellow-red {
+  0% { 
+    background-color: #fff8b0 !important; 
+  }
+  100% { 
+    background-color: #ff7f7f !important; 
+  }
+}
+
+/* Test class để kiểm tra animation hoạt động */
+.test-blink {
+  background-color: #fff8b0 !important;
+  animation: test-blink 1s infinite alternate !important;
+}
+
+@keyframes test-blink {
+  0% { 
+    background-color: #fff8b0 !important; 
+  }
+  100% { 
+    background-color: #ff7f7f !important; 
+  }
 }
 
 .null-time-done {
@@ -241,6 +271,9 @@ body {
 #car-list tbody tr.row-selected {
   position: relative;
 }
+#car-list tbody tr.duplicate-overdue {
+  position: relative;
+}
 #car-list tbody tr.row-selected::after {
   content: '';
   position: absolute;
@@ -253,9 +286,24 @@ body {
   pointer-events: none;
   z-index: 2;
 }
+#car-list tbody tr.duplicate-overdue::after {
+  content: '';
+  position: absolute;
+  top: -2px;
+  bottom: -2px;
+  left: 0;
+  right: 0;
+  border: 2px solid #0d6efd; /* blue border for duplicates */
+  border-radius: 4px;
+  pointer-events: none;
+  z-index: 2;
+}
 
 /* Robust red border per cell for selected rows */
 #car-list tbody tr.row-selected td {
+  position: relative;
+}
+#car-list tbody tr.duplicate-overdue td {
   position: relative;
 }
 #car-list tbody tr.row-selected td::after {
@@ -266,6 +314,18 @@ body {
   bottom: 1px;
   left: 1px;
   border: 2px solid #ff3b30;
+  pointer-events: none;
+  border-radius: 3px;
+  z-index: 3;
+}
+#car-list tbody tr.duplicate-overdue td::after {
+  content: '';
+  position: absolute;
+  top: 1px;
+  right: 1px;
+  bottom: 1px;
+  left: 1px;
+  border: 2px solid #0d6efd; /* blue border for duplicates */
   pointer-events: none;
   border-radius: 3px;
   z-index: 3;

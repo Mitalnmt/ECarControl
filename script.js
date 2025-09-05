@@ -213,18 +213,6 @@ function renderCarList() {
       handleRowClick(car.id, row);
     });
 
-    // Kiểm tra trạng thái để set class
-    if (car.isNullTime) {
-      row.classList.add('null-time-done');
-    } else if (car.done) {
-      row.classList.add('done');
-    } else if (getRemainingTimeInMillis(car.timeIn, car) <= 0) {
-      row.classList.add('overdue');
-    }
-    // Nếu mã xe bị trùng VÀ xe chưa được ấn vào, thêm class duplicate-done
-    if (!car.done && countByCode[car.carCode] >= 2) {
-      row.classList.add('duplicate-done');
-    }
     // Nếu đang được chọn
     if (selectedIds.has(car.id)) {
       row.classList.add('row-selected');
@@ -282,6 +270,34 @@ function renderCarList() {
     `;
 
     // Không render dòng phụ nữa
+  });
+
+  // Áp dụng class trạng thái sau khi tạo xong tất cả các dòng
+  carList.forEach((car, index) => {
+    const row = tbody.rows[index];
+    if (!row) return;
+    
+    // Kiểm tra trạng thái để set class
+    if (car.isNullTime) {
+      row.classList.add('null-time-done');
+    } else if (car.done) {
+      row.classList.add('done');
+    } else {
+      const isOverdue = getRemainingTimeInMillis(car.timeIn, car) <= 0;
+      const isDuplicate = !car.done && countByCode[car.carCode] >= 2;
+      
+      if (isOverdue && isDuplicate) {
+        // Xe vừa bị trùng vừa hết thời gian - nhấp nháy vàng-đỏ
+        console.log(`Xe ${car.carCode} vừa trùng vừa hết thời gian - áp dụng duplicate-overdue`);
+        row.classList.add('duplicate-overdue');
+      } else if (isOverdue) {
+        // Chỉ hết thời gian - màu đỏ
+        row.classList.add('overdue');
+      } else if (isDuplicate) {
+        // Chỉ bị trùng - nhấp nháy vàng
+        row.classList.add('duplicate-done');
+      }
+    }
   });
 
   // Thêm dòng xe ảo để tạo khoảng trống tránh bị bottom bar che
@@ -365,6 +381,14 @@ function updateCountdowns() {
   // Cập nhật countdown cho từng dòng (nếu bảng đã render)
   const tbody = document.getElementById('car-list').getElementsByTagName('tbody')[0];
   if (tbody) {
+    // Đếm lại số lượng xe theo mã xe (chỉ đếm xe chưa được ấn vào)
+    const countByCode = {};
+    carList.forEach(car => {
+      if (!car.done) { // Chỉ đếm xe chưa được ấn vào (chưa có done = true)
+        countByCode[car.carCode] = (countByCode[car.carCode] || 0) + 1;
+      }
+    });
+    
     for (let i = 0; i < carList.length; i++) {
       const row = tbody.rows[i];
       if (row) {
@@ -372,14 +396,26 @@ function updateCountdowns() {
         if (countdownCell) {
           countdownCell.innerHTML = `<span class="countdown">${getRemainingTime(carList[i].timeIn, carList[i])}</span>`;
         }
-        row.classList.remove('done', 'overdue', 'null-time-done', 'row-selected');
+        row.classList.remove('done', 'overdue', 'null-time-done', 'duplicate-done', 'duplicate-overdue', 'row-selected');
         const car = carList[i];
         if (car.isNullTime) {
           row.classList.add('null-time-done');
         } else if (car.done) {
           row.classList.add('done');
-        } else if (getRemainingTimeInMillis(car.timeIn, car) <= 0) {
-          row.classList.add('overdue');
+        } else {
+          const isOverdue = getRemainingTimeInMillis(car.timeIn, car) <= 0;
+          const isDuplicate = !car.done && countByCode[car.carCode] >= 2;
+          
+          if (isOverdue && isDuplicate) {
+            // Xe vừa bị trùng vừa hết thời gian - nhấp nháy vàng-đỏ
+            row.classList.add('duplicate-overdue');
+          } else if (isOverdue) {
+            // Chỉ hết thời gian - màu đỏ
+            row.classList.add('overdue');
+          } else if (isDuplicate) {
+            // Chỉ bị trùng - nhấp nháy vàng
+            row.classList.add('duplicate-done');
+          }
         }
         if (selectedIds.has(car.id)) {
           row.classList.add('row-selected');
@@ -449,11 +485,31 @@ function changeTime(index, delta = 1) {
       countdownCell.innerHTML = `<span class="countdown">${getRemainingTime(car.timeIn, car)}</span>`;
     }
     // Cập nhật class
-    row.classList.remove('done', 'overdue');
+    row.classList.remove('done', 'overdue', 'duplicate-done', 'duplicate-overdue');
     if (car.done) {
       row.classList.add('done');
-    } else if (getRemainingTimeInMillis(car.timeIn, car) <= 0) {
-      row.classList.add('overdue');
+    } else {
+      // Đếm lại số lượng xe theo mã xe để kiểm tra trùng
+      const countByCode = {};
+      carList.forEach(c => {
+        if (!c.done) {
+          countByCode[c.carCode] = (countByCode[c.carCode] || 0) + 1;
+        }
+      });
+      
+      const isOverdue = getRemainingTimeInMillis(car.timeIn, car) <= 0;
+      const isDuplicate = !car.done && countByCode[car.carCode] >= 2;
+      
+      if (isOverdue && isDuplicate) {
+        // Xe vừa bị trùng vừa hết thời gian - nhấp nháy vàng-đỏ
+        row.classList.add('duplicate-overdue');
+      } else if (isOverdue) {
+        // Chỉ hết thời gian - màu đỏ
+        row.classList.add('overdue');
+      } else if (isDuplicate) {
+        // Chỉ bị trùng - nhấp nháy vàng
+        row.classList.add('duplicate-done');
+      }
     }
   }
 }
@@ -487,13 +543,33 @@ function toggleDone(index) {
       btn.textContent = car.done ? 'Res' : 'Vào';
     }
     // Cập nhật class dòng
-    row.classList.remove('done', 'overdue', 'null-time-done');
+    row.classList.remove('done', 'overdue', 'null-time-done', 'duplicate-done', 'duplicate-overdue');
     if (car.isNullTime) {
       row.classList.add('null-time-done');
     } else if (car.done) {
       row.classList.add('done');
-    } else if (getRemainingTimeInMillis(car.timeIn, car) <= 0) {
-      row.classList.add('overdue');
+    } else {
+      // Đếm lại số lượng xe theo mã xe để kiểm tra trùng
+      const countByCode = {};
+      carList.forEach(c => {
+        if (!c.done) {
+          countByCode[c.carCode] = (countByCode[c.carCode] || 0) + 1;
+        }
+      });
+      
+      const isOverdue = getRemainingTimeInMillis(car.timeIn, car) <= 0;
+      const isDuplicate = !car.done && countByCode[car.carCode] >= 2;
+      
+      if (isOverdue && isDuplicate) {
+        // Xe vừa bị trùng vừa hết thời gian - nhấp nháy vàng-đỏ
+        row.classList.add('duplicate-overdue');
+      } else if (isOverdue) {
+        // Chỉ hết thời gian - màu đỏ
+        row.classList.add('overdue');
+      } else if (isDuplicate) {
+        // Chỉ bị trùng - nhấp nháy vàng
+        row.classList.add('duplicate-done');
+      }
     }
   }
   saveCarListToStorage(false);
@@ -1282,6 +1358,8 @@ function toggleFullscreen() {
 document.addEventListener('fullscreenchange', updateFullscreenIcon);
 document.addEventListener('webkitfullscreenchange', updateFullscreenIcon);
 document.addEventListener('msfullscreenchange', updateFullscreenIcon);
+
+// (Đã xóa các nút test blink/css và listener liên quan)
 
 function updateFullscreenIcon() {
   const fullscreenBtn = document.getElementById('fullscreenBtn');
