@@ -159,7 +159,7 @@ if (showModalBtn) {
 }
 
 // Thêm xe vào danh sách
-function addCar(carCode, options = {}) {
+function addCar(carCode, groupMeta) {
   const now = new Date();
   const timeOut = new Date(now.getTime());  // Thời gian ra là thời gian hiện tại
   const timeIn = new Date(timeOut.getTime());  // Thời gian vào là 15 phút sau thời gian ra
@@ -174,7 +174,9 @@ function addCar(carCode, options = {}) {
     paid: false,
     done: false,
     timeChanged: "",  // Lưu giá trị cộng trừ
-    groupColor: options.groupColor || undefined,
+    // Nhóm đi chung (nếu có)
+    groupId: groupMeta && groupMeta.groupId ? groupMeta.groupId : undefined,
+    groupColor: groupMeta && groupMeta.groupColor ? groupMeta.groupColor : undefined,
   };
 
   carList.push(car);
@@ -236,8 +238,11 @@ function renderCarList() {
 
     // Mã xe mới + các mã xe cũ (nếu có)
     const cell3 = row.insertCell(2);
-    const codeColorStyle = car.groupColor ? `color:${car.groupColor};` : '';
-    let carCodeHtml = `<span style="font-size: 1.2em; font-weight: bold; ${codeColorStyle}">${car.carCode}</span>`;
+    let colorStyle = '';
+    if (car.groupColor) {
+      colorStyle = `color: ${car.groupColor};`;
+    }
+    let carCodeHtml = `<span style="font-size: 1.2em; font-weight: bold; ${colorStyle}">${car.carCode}</span>`;
     if (car.oldCarCodes && car.oldCarCodes.length > 0) {
       carCodeHtml += ` <span class='old-car-code-italic'>(` + car.oldCarCodes.map(code => `${code}`).join(', ') + `)</span>`;
     }
@@ -776,6 +781,13 @@ function saveCarListToStorage(skipHistory = false) {
       timeOut: car.timeOut.toISOString(),
       timeIn: car.timeIn.toISOString(),
     };
+    // Đảm bảo lưu groupId/groupColor nếu có
+    if (typeof car.groupId === 'undefined') {
+      delete obj.groupId;
+    }
+    if (typeof car.groupColor === 'undefined') {
+      delete obj.groupColor;
+    }
     // pausedAt chỉ lưu nếu là số, nếu undefined thì bỏ
     if (typeof car.pausedAt === 'number') {
       obj.pausedAt = car.pausedAt;
@@ -804,6 +816,13 @@ function loadCarListFromStorage() {
           timeOut: new Date(car.timeOut),
           timeIn: new Date(car.timeIn),
         };
+        // Chuẩn hóa groupId/groupColor
+        if (car.groupId === null || car.groupId === '') {
+          delete obj.groupId;
+        }
+        if (car.groupColor === null || car.groupColor === '') {
+          delete obj.groupColor;
+        }
         // pausedAt phải là số hoặc undefined
         if (typeof car.pausedAt === 'number') {
           obj.pausedAt = car.pausedAt;

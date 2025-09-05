@@ -3,8 +3,20 @@ class MultipleCarSelection {
   constructor() {
     this.selectedCars = new Set(); // Lưu các xe đã chọn
     this.carGroups = []; // Lưu cấu hình menu xe từ car menu editor
-    this.groupColorPalette = ['#1e88e5', '#d81b60', '#43a047', '#8e24aa', '#fb8c00', '#00897b', '#5e35b1', '#f4511e'];
-    this.nextGroupColorIndex = 0;
+    // Bảng màu tương phản để tô nhóm Mã xe (ưu tiên dễ đọc trên nền đỏ/xanh/vàng)
+    this.groupColorPalette = [
+      '#1e88e5', // blue 600
+      '#8e24aa', // purple 600
+      '#00897b', // teal 600
+      '#f4511e', // deep orange 600
+      '#6d4c41', // brown 600
+      '#3949ab', // indigo 600
+      '#00acc1', // cyan 600
+      '#c2185b', // pink 700
+      '#2e7d32', // green 800 (dark enough on yellow)
+      '#455a64'  // blue gray 600
+    ];
+    this.groupColorIndexKey = 'groupColorIndex';
     this.init();
   }
 
@@ -188,21 +200,28 @@ class MultipleCarSelection {
       return;
     }
 
-    let applyGroupColor = false;
-    if (this.selectedCars.size > 1) {
-      applyGroupColor = confirm('Các xe này đi chung với nhau?');
+    // Hỏi có đi chung không
+    const isGrouped = confirm('Các xe này có đi chung không?');
+
+    let groupMeta = null;
+    if (isGrouped) {
+      // Tạo group id và lấy màu kế tiếp trong bảng màu (lưu chỉ số vào localStorage để xoay vòng)
+      const groupId = Date.now();
+      let idx = Number(localStorage.getItem(this.groupColorIndexKey));
+      if (Number.isNaN(idx) || idx < 0) idx = 0;
+      const color = this.groupColorPalette[idx % this.groupColorPalette.length];
+      localStorage.setItem(this.groupColorIndexKey, String((idx + 1) % this.groupColorPalette.length));
+      groupMeta = { groupId, groupColor: color };
     }
 
-    let colorForGroup;
-    if (applyGroupColor) {
-      colorForGroup = this.groupColorPalette[this.nextGroupColorIndex % this.groupColorPalette.length];
-      this.nextGroupColorIndex++;
-    }
-
-    // Thêm từng xe đã chọn, kèm màu nhóm nếu có
+    // Thêm từng xe đã chọn
     this.selectedCars.forEach(carCode => {
       if (typeof addCar === 'function') {
-        addCar(carCode, { groupColor: colorForGroup });
+        if (groupMeta) {
+          addCar(carCode, groupMeta);
+        } else {
+          addCar(carCode);
+        }
       }
     });
 
