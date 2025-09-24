@@ -264,6 +264,46 @@ body {
   box-shadow: 0 0 0 2px #000 !important; /* visual black border without layout shift */
 }
 
+/* Multi-select modal responsive adjustments to avoid bottomBar overlap */
+@media (max-width: 768px) {
+  #selectMultipleModal .modal-dialog {
+    margin: 10px;
+    margin-bottom: 80px; /* create space above bottomBar */
+    max-height: calc(100vh - 90px); /* keep within viewport minus bottom bar */
+  }
+  #selectMultipleModal .modal-content {
+    max-height: calc(100vh - 100px);
+    overflow-y: auto;
+  }
+  #selectMultipleModal .modal-footer {
+    flex-wrap: wrap;
+    gap: 5px;
+    padding: 10px;
+  }
+  #selectMultipleModal .modal-footer .btn {
+    flex: 1;
+    min-width: calc(50% - 5px);
+    margin: 2px 0;
+    font-size: 0.85rem;
+    padding: 6px 8px;
+  }
+}
+
+@media (max-width: 480px) {
+  #selectMultipleModal .modal-dialog {
+    margin: 5px;
+    margin-bottom: 70px; /* extra space for smaller screens */
+    max-height: calc(100vh - 80px);
+  }
+  #selectMultipleModal .modal-content {
+    max-height: calc(100vh - 90px);
+  }
+  #selectMultipleModal .modal-footer .btn {
+    font-size: 0.8rem;
+    padding: 5px 6px;
+  }
+}
+
 /* Responsive adjustments for multiple car selection */
 @media (min-width: 768px) {
   #multipleCarSelectionContainer .btn {
