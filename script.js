@@ -242,7 +242,8 @@ function renderCarList() {
       colorStyle = `color: ${car.groupColor};`;
     }
     const borderStyle = car.groupColor ? `border-color: ${car.groupColor};` : '';
-    let carCodeHtml = `<button class="btn btn-sm btn-outline-secondary car-code-btn" style="${colorStyle}${borderStyle}" onclick="changeCarCode(${index})">${car.carCode}</button>`;
+    const groupedClass = car.groupColor ? 'grouped' : 'no-border';
+    let carCodeHtml = `<button class="btn btn-sm car-code-btn ${groupedClass}" style="${colorStyle}${borderStyle}" onclick="changeCarCode(${index})">${car.carCode}</button>`;
     if (car.oldCarCodes && car.oldCarCodes.length > 0) {
       carCodeHtml += ` <div class='old-car-code-italic'>(` + car.oldCarCodes.map(code => `${code}`).join(', ') + `)</div>`;
     }

@@ -165,6 +165,13 @@
   min-width: 3.2em;
   padding: 2px 8px;
   line-height: 1.2;
+  border-width: 2px;
+}
+.car-code-btn.no-border {
+  border-color: transparent !important;
+}
+.car-code-btn.grouped {
+  /* border-color set inline from groupColor */
 }
 
 #bottomBar {
