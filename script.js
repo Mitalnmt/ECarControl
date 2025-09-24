@@ -875,6 +875,22 @@ updateCountdowns();
 // Xóa dữ liệu xe tạm thời cũ nếu có
 localStorage.removeItem('tempCars');
 
+// --- Helper: Lấy danh sách mã xe đang ra (chưa done) ---
+function getActiveOutCarCodes() {
+  try {
+    const set = new Set();
+    carList.forEach(car => {
+      if (!car.done) {
+        set.add(car.carCode);
+      }
+    });
+    return set;
+  } catch (_) {
+    return new Set();
+  }
+}
+window.getActiveOutCarCodes = getActiveOutCarCodes;
+
 // --- Xóa tất cả ---
 let confirmDeleteAllCount = 0;
 const deleteAllBtn = document.getElementById('deleteAllBtn');

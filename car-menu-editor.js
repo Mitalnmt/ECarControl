@@ -367,6 +367,7 @@ class CarMenuEditor {
     modalBody.innerHTML = '';
 
     // Thêm các nhóm xe mới
+    const outSet = (window.getActiveOutCarCodes && window.getActiveOutCarCodes()) || new Set();
     this.carGroups.forEach(group => {
       if (group.cars.length > 0) {
         const groupDiv = document.createElement('div');
@@ -374,8 +375,12 @@ class CarMenuEditor {
         const bg = group.color || '';
         const color = bg ? this.getContrastingTextColor(bg) : '';
         groupDiv.innerHTML = group.cars.map(car => {
-          const style = bg ? `style=\"background-color:${bg};color:${color};border-color:${bg}\"` : '';
-          return `<button class="btn ${bg ? 'm-1' : 'btn-secondary m-1'}" ${style} onclick="selectCarCode('${car}')">${car}</button>`;
+          const isOut = outSet.has(car);
+          const style = (!isOut && bg) ? `style=\"background-color:${bg};color:${color};border-color:${bg}\"` : '';
+          const outClass = isOut ? ' btn-car-out' : '';
+          const baseClass = (!bg ? 'btn-secondary ' : '');
+          const classes = isOut ? 'btn m-1' : `btn ${baseClass}m-1`;
+          return `<button class=\"${classes}${outClass}\" ${style} onclick=\"selectCarCode('${car}')\">${car}</button>`;
         }).join('');
         modalBody.appendChild(groupDiv);
       }

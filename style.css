@@ -419,3 +419,15 @@ body {
 #selectionBar .btn {
   color: #000 !important;
 }
+
+/* Nút xe đang ra trong menu: hiển thị đen tối nhưng vẫn bấm được */
+.btn-car-out {
+  background-color: #bfbfbf !important;
+  color: #000 !important;
+  border-color: #999 !important;
+  filter: none !important;
+}
+.btn-car-out.selected {
+  /* Khi chọn, vẫn giữ cảm giác được chọn nhưng không quá rực */
+  box-shadow: 0 0 0 2px #000 inset;
+}

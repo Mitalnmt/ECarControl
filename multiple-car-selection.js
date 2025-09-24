@@ -121,9 +121,15 @@ class MultipleCarSelection {
     const bg = group.color || '';
     const color = bg ? this.getContrastingTextColor(bg) : '';
     const style = bg ? `style=\"background-color:${bg};color:${color};border-color:${bg}\"` : '';
+    const outSet = (window.getActiveOutCarCodes && window.getActiveOutCarCodes()) || new Set();
+    const isOut = outSet.has(car);
+    const outClass = isOut ? ' btn-car-out' : '';
+    const baseClass = (!bg ? 'btn-secondary ' : '');
+    const classes = isOut ? `btn m-1${isSelected ? ' selected' : ''}` : `btn ${baseClass}m-1${isSelected ? ' selected' : ''}`;
+    const appliedStyle = isOut ? '' : style;
     return `
-      <button class="btn ${bg ? '' : (isSelected ? 'btn-primary' : 'btn-secondary')} m-1${isSelected ? ' selected' : ''}" 
-              ${style}
+      <button class="${classes}${outClass}" 
+              ${appliedStyle}
               onclick="multipleCarSelection.toggleCarSelection('${car}')"
               data-car-code="${car}">
         ${car}
