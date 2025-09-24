@@ -15,7 +15,7 @@ class MultipleCarSelection {
     this.groupColorIndexKey = 'groupColorIndex';
     this.init();
   }
-
+ 
   init() {
     this.loadCarGroups();
     this.setupEventListeners();
