@@ -278,12 +278,13 @@ class CarMenuEditor {
     if (!container) return;
 
     container.innerHTML = `
-      <div class="mb-3">
-        <h6>Quản lý Menu Xe</h6>
-        <p class="text-muted small">Chỉnh sửa các nhóm xe và thứ tự hiển thị. Sử dụng nút ↑↓ để di chuyển vị trí.</p>
-        <div class="d-flex gap-2 mb-2">
-          <input type="text" class="form-control form-control-sm" id="newGroupName" placeholder="Tên nhóm mới">
-          <button class="btn btn-sm btn-primary" onclick="carMenuEditor.addGroupFromUI()">Thêm nhóm</button>
+      <div class="mb-3 d-flex justify-content-between align-items-center">
+        <div>
+          <h6 class="mb-1">Quản lý Menu Xe</h6>
+          <p class="text-muted small mb-0">Kéo thả các nút để sắp xếp, kéo vào thùng rác để xóa. Nhấn vào tiêu đề nhóm để đổi tên. Thêm xe bằng ô nhập bên dưới mỗi nhóm.</p>
+        </div>
+        <div id="trashBin" class="trash-bin" ondragover="carMenuEditor.onTrashDragOver(event)" ondrop="carMenuEditor.onTrashDrop(event)">
+          🗑️ Thùng rác
         </div>
       </div>
       <div id="carGroupsContainer">
@@ -293,30 +294,41 @@ class CarMenuEditor {
     `;
   }
 
-  // Render một nhóm xe
+  // Render một nhóm xe (dạng lưới nút như menu chính)
   renderGroup(group, groupIndex) {
+    const bg = group.color || '';
+    const color = bg ? this.getContrastingTextColor(bg) : '';
+    const style = bg ? `style=\"background-color:${bg};color:${color};border-color:${bg}\"` : '';
     return `
       <div class="card mb-3" data-group-index="${groupIndex}">
         <div class="card-header d-flex justify-content-between align-items-center">
           <div class="d-flex align-items-center gap-2">
             <button class="btn btn-sm btn-outline-secondary" onclick="carMenuEditor.moveGroupUp(${groupIndex})" ${groupIndex === 0 ? 'disabled' : ''} title="Di chuyển nhóm lên">↑</button>
             <button class="btn btn-sm btn-outline-secondary" onclick="carMenuEditor.moveGroupDown(${groupIndex})" ${groupIndex === this.carGroups.length - 1 ? 'disabled' : ''} title="Di chuyển nhóm xuống">↓</button>
-            <input type="text" class="form-control form-control-sm" style="width: 150px;" value="${group.name}" onchange="carMenuEditor.editGroupNameFromUI(${groupIndex}, this.value)" placeholder="Tên nhóm">
+            <input type="text" class="form-control form-control-sm" style="width: 180px;" value="${group.name}" onchange="carMenuEditor.editGroupNameFromUI(${groupIndex}, this.value)" placeholder="Tên nhóm">
             <span class="badge bg-secondary">${group.cars.length} xe</span>
             <div class="d-flex align-items-center gap-1">
-              <input type="color" value="${group.color || '#cccccc'}" onchange="carMenuEditor.setGroupColorFromUI(${groupIndex}, this.value)" title="Màu nhóm">
+              <input type="color" value="${bg || '#cccccc'}" onchange="carMenuEditor.setGroupColorFromUI(${groupIndex}, this.value)" title="Màu nhóm">
               <span class="small text-muted">Màu nhóm</span>
             </div>
           </div>
           <button class="btn btn-sm btn-danger" onclick="carMenuEditor.removeGroup(${groupIndex})" title="Xóa nhóm">Xóa nhóm</button>
         </div>
         <div class="card-body">
-          <div class="d-flex gap-2 mb-2">
+          <div class="mb-2 d-flex flex-wrap align-items-center" data-drop-zone data-group-index="${groupIndex}" ondragover="carMenuEditor.onGroupDragOver(event)" ondrop="carMenuEditor.onGroupDrop(event)" ondragleave="carMenuEditor.onGroupDragLeave(event)">
+            ${group.cars.map((car, carIndex) => `
+              <button class="btn ${bg ? 'm-1' : 'btn-secondary m-1'}" ${style}
+                      draggable="true"
+                      ondragstart="carMenuEditor.onDragStart(event, ${groupIndex}, ${carIndex})"
+                      ondragend="carMenuEditor.onDragEnd(event)"
+                      data-group-index="${groupIndex}" data-car-index="${carIndex}">
+                ${car}
+              </button>
+            `).join('')}
+          </div>
+          <div class="d-flex gap-2">
             <input type="text" class="form-control form-control-sm" id="newCarCode_${groupIndex}" placeholder="Mã xe mới">
             <button class="btn btn-sm btn-primary" onclick="carMenuEditor.addCarFromUI(${groupIndex})">Thêm xe</button>
-          </div>
-          <div class="car-list">
-            ${group.cars.length > 0 ? group.cars.map((car, carIndex) => this.renderCar(car, groupIndex, carIndex)).join('') : '<p class="text-muted text-center small">Chưa có xe nào trong nhóm này</p>'}
           </div>
         </div>
       </div>
@@ -490,6 +502,148 @@ class CarMenuEditor {
       return luminance > 186 ? '#000000' : '#ffffff';
     } catch (e) {
       return '#ffffff';
+    }
+  }
+
+  // DnD helpers for live preview
+  getZoneItems(zone) {
+    return Array.from(zone.querySelectorAll('button[draggable="true"], .drop-placeholder'));
+  }
+  ensurePlaceholder(zone) {
+    let ph = zone.querySelector('.drop-placeholder');
+    if (!ph) {
+      ph = document.createElement('span');
+      ph.className = 'drop-placeholder m-1';
+      ph.textContent = '';
+    }
+    return ph;
+  }
+  placePlaceholder(zone, index) {
+    const ph = this.ensurePlaceholder(zone);
+    const items = this.getZoneItems(zone);
+    // If placeholder already in DOM at correct position, skip
+    if (!ph.parentElement || items[index] !== ph) {
+      if (!ph.parentElement) {
+        // no-op, will insert below
+      } else {
+        ph.parentElement.removeChild(ph);
+      }
+      const children = Array.from(zone.children);
+      // Find the element before which to insert among existing elements (buttons or placeholder)
+      let count = 0;
+      for (let i = 0; i < children.length; i++) {
+        const el = children[i];
+        if (el.matches && (el.matches('button[draggable="true"]') || el.classList.contains('drop-placeholder'))) {
+          if (count === index) {
+            zone.insertBefore(ph, el);
+            return;
+          }
+          count++;
+        }
+      }
+      zone.appendChild(ph);
+    }
+  }
+  removePlaceholder(zone) {
+    const ph = zone.querySelector('.drop-placeholder');
+    if (ph) ph.remove();
+  }
+
+  onDragStart(ev, groupIndex, carIndex) {
+    try {
+      ev.dataTransfer.setData('text/plain', JSON.stringify({ groupIndex, carIndex }));
+      ev.dataTransfer.effectAllowed = 'move';
+      ev.target.classList.add('dragging');
+      const bin = document.getElementById('trashBin');
+      if (bin) bin.classList.add('active');
+    } catch (_) {}
+  }
+  onDragEnd(ev) {
+    ev.target.classList.remove('dragging');
+    const bin = document.getElementById('trashBin');
+    if (bin) bin.classList.remove('active');
+    // Clean all placeholders
+    document.querySelectorAll('[data-drop-zone]').forEach(z => this.removePlaceholder(z));
+  }
+  onGroupDragOver(ev) {
+    ev.preventDefault();
+    ev.dataTransfer.dropEffect = 'move';
+    const zone = ev.currentTarget;
+    const insertIndex = this.getDropIndex(zone, ev);
+    this.placePlaceholder(zone, insertIndex);
+  }
+  // Tính vị trí chèn dựa theo tọa độ con trỏ so với các nút hiện có
+  getDropIndex(zone, ev) {
+    const items = Array.from(zone.querySelectorAll('button[draggable="true"]'));
+    if (items.length === 0) return 0;
+    const x = ev.clientX;
+    const y = ev.clientY;
+    for (let i = 0; i < items.length; i++) {
+      const rect = items[i].getBoundingClientRect();
+      const midY = rect.top + rect.height / 2;
+      const midX = rect.left + rect.width / 2;
+      if (y < midY) return i;
+      if (y >= rect.top && y <= rect.bottom && x < midX) return i;
+    }
+    return items.length; // Mặc định chèn cuối
+  }
+  onGroupDrop(ev) {
+    ev.preventDefault();
+    const zone = ev.currentTarget;
+    const toGroup = Number(zone.getAttribute('data-group-index'));
+    let payload;
+    try { payload = JSON.parse(ev.dataTransfer.getData('text/plain')); } catch (_) { return; }
+    const { groupIndex: fromGroup, carIndex } = payload || {};
+    if (Number.isNaN(fromGroup) || Number.isNaN(carIndex)) return;
+
+    const car = this.carGroups[fromGroup]?.cars?.[carIndex];
+    if (!car) return;
+
+    // Tính vị trí chèn theo con trỏ
+    let insertIndex = this.getDropIndex(zone, ev);
+
+    // Xóa khỏi nguồn
+    this.carGroups[fromGroup].cars.splice(carIndex, 1);
+
+    // Nếu kéo trong cùng group và vị trí xóa đứng trước vị trí chèn, cần điều chỉnh index đích
+    if (fromGroup === toGroup && carIndex < insertIndex) {
+      insertIndex = Math.max(0, insertIndex - 1);
+    }
+
+    // Chen vào đích
+    insertIndex = Math.max(0, Math.min(insertIndex, this.carGroups[toGroup].cars.length));
+    this.carGroups[toGroup].cars.splice(insertIndex, 0, car);
+
+    // Cleanup placeholder
+    this.removePlaceholder(zone);
+
+    this.saveToStorage();
+    this.renderEditor();
+  }
+  onGroupDragLeave(ev) {
+    const zone = ev.currentTarget;
+    // Nếu con trỏ rời hoàn toàn khỏi zone, bỏ placeholder
+    const rect = zone.getBoundingClientRect();
+    const { clientX: x, clientY: y } = ev;
+    if (x < rect.left || x > rect.right || y < rect.top || y > rect.bottom) {
+      this.removePlaceholder(zone);
+    }
+  }
+  onTrashDragOver(ev) {
+    ev.preventDefault();
+    ev.dataTransfer.dropEffect = 'move';
+  }
+  onTrashDrop(ev) {
+    ev.preventDefault();
+    let payload;
+    try { payload = JSON.parse(ev.dataTransfer.getData('text/plain')); } catch (_) { return; }
+    const { groupIndex, carIndex } = payload || {};
+    if (Number.isNaN(groupIndex) || Number.isNaN(carIndex)) return;
+
+    if (this.carGroups[groupIndex] && this.carGroups[groupIndex].cars[carIndex] !== undefined) {
+      this.carGroups[groupIndex].cars.splice(carIndex, 1);
+      this.saveToStorage();
+      this.renderEditor();
     }
   }
 }

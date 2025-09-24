@@ -170,9 +170,7 @@
 .car-code-btn.no-border {
   border-color: transparent !important;
 }
-.car-code-btn.grouped {
-  /* border-color set inline from groupColor */
-}
+.car-code-btn.grouped { border-style: solid; }
 
 #bottomBar {
   position: fixed;
@@ -255,6 +253,29 @@ body {
 #carMenuEditorContainer .car-list {
   max-height: 200px;
   overflow-y: auto;
+}
+
+/* New editor drag UI */
+#carMenuEditorContainer .dragging {
+  opacity: 0.6;
+}
+.trash-bin {
+  border: 2px dashed #dc3545;
+  color: #dc3545;
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-weight: 600;
+}
+.trash-bin.active {
+  background: rgba(220,53,69,0.08);
+}
+.drop-placeholder {
+  display: inline-block;
+  width: 52px;
+  height: 32px;
+  border: 2px dashed #0d6efd;
+  border-radius: 6px;
+  vertical-align: middle;
 }
 
 #carMenuEditorContainer .btn-sm {
