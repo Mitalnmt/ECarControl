@@ -121,8 +121,13 @@ class MultipleCarSelection {
   // Render một xe (giống menu cũ nhưng có checkbox)
   renderCar(car, groupIndex, carIndex) {
     const isSelected = this.selectedCars.has(car);
+    const group = this.carGroups[groupIndex] || {};
+    const bg = group.color || '';
+    const color = bg ? this.getContrastingTextColor(bg) : '';
+    const style = bg ? `style=\"background-color:${bg};color:${color};border-color:${bg}\"` : '';
     return `
-      <button class="btn ${isSelected ? 'btn-primary' : 'btn-secondary'} m-1" 
+      <button class="btn ${bg ? '' : (isSelected ? 'btn-primary' : 'btn-secondary')} m-1" 
+              ${style}
               onclick="multipleCarSelection.toggleCarSelection('${car}')"
               data-car-code="${car}">
         ${car}
@@ -137,14 +142,18 @@ class MultipleCarSelection {
     if (this.selectedCars.has(carCode)) {
       this.selectedCars.delete(carCode);
       if (button) {
-        button.classList.remove('btn-primary');
-        button.classList.add('btn-secondary');
+        if (!button.getAttribute('style')) {
+          button.classList.remove('btn-primary');
+          button.classList.add('btn-secondary');
+        }
       }
     } else {
       this.selectedCars.add(carCode);
       if (button) {
-        button.classList.remove('btn-secondary');
-        button.classList.add('btn-primary');
+        if (!button.getAttribute('style')) {
+          button.classList.remove('btn-secondary');
+          button.classList.add('btn-primary');
+        }
       }
     }
     
@@ -159,8 +168,10 @@ class MultipleCarSelection {
           this.selectedCars.add(car);
           const button = document.querySelector(`button[data-car-code="${car}"]`);
           if (button) {
-            button.classList.remove('btn-secondary');
-            button.classList.add('btn-primary');
+            if (!button.getAttribute('style')) {
+              button.classList.remove('btn-secondary');
+              button.classList.add('btn-primary');
+            }
           }
         }
       });
@@ -176,8 +187,10 @@ class MultipleCarSelection {
     // Reset tất cả button về trạng thái không chọn
     const buttons = document.querySelectorAll('button[data-car-code]');
     buttons.forEach(button => {
-      button.classList.remove('btn-primary');
-      button.classList.add('btn-secondary');
+      if (!button.getAttribute('style')) {
+        button.classList.remove('btn-primary');
+        button.classList.add('btn-secondary');
+      }
     });
 
     this.updateSelectedCount();
@@ -238,6 +251,20 @@ class MultipleCarSelection {
 
     // Reset selection
     this.selectedCars.clear();
+  }
+
+  // Tính màu chữ tương phản (đen hoặc trắng) dựa vào nền
+  getContrastingTextColor(hexColor) {
+    try {
+      const hex = hexColor.replace('#', '');
+      const r = parseInt(hex.substring(0, 2), 16);
+      const g = parseInt(hex.substring(2, 4), 16);
+      const b = parseInt(hex.substring(4, 6), 16);
+      const luminance = 0.299 * r + 0.587 * g + 0.114 * b;
+      return luminance > 186 ? '#000000' : '#ffffff';
+    } catch (e) {
+      return '#ffffff';
+    }
   }
 }
 

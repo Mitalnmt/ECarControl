@@ -4,31 +4,38 @@ class CarMenuEditor {
     this.carGroups = [
       {
         name: 'Nhóm A',
-        cars: ['A1', 'A12', 'A13', 'A14', 'A15', 'A16', 'A17', 'A18', 'A19', 'A20', 'AB']
+        cars: ['A1', 'A12', 'A13', 'A14', 'A15', 'A16', 'A17', 'A18', 'A19', 'A20', 'AB'],
+        color: ''
       },
       {
         name: 'Nhóm C', 
-        cars: ['C1', 'C2', 'C3', 'C4', 'CC', 'CX']
+        cars: ['C1', 'C2', 'C3', 'C4', 'CC', 'CX'],
+        color: ''
       },
       {
         name: 'Nhóm M',
-        cars: ['M1', 'M2', 'M3', 'D3']
+        cars: ['M1', 'M2', 'M3', 'D3'],
+        color: ''
       },
       {
         name: 'Nhóm X',
-        cars: ['XĐ', 'XT', 'XV']
+        cars: ['XĐ', 'XT', 'XV'],
+        color: ''
       },
       {
         name: 'Nhóm S',
-        cars: ['S1', 'S2', 'S3', 'S4']
+        cars: ['S1', 'S2', 'S3', 'S4'],
+        color: ''
       },
       {
         name: 'Nhóm số',
-        cars: ['03', '06', '09', '10', '25']
+        cars: ['03', '06', '09', '10', '25'],
+        color: ''
       },
       {
         name: 'Nhóm đặc biệt',
-        cars: ['ĐM', 'ĐC', 'VH']
+        cars: ['ĐM', 'ĐC', 'VH'],
+        color: ''
       }
     ];
     
@@ -74,13 +81,23 @@ class CarMenuEditor {
       window.db.ref('carMenuConfig').once('value').then((snapshot) => {
         const data = snapshot.val();
         if (data) {
-          this.carGroups = data;
+          // Chuẩn hóa để đảm bảo có field color
+          this.carGroups = data.map(g => ({
+            name: g.name,
+            cars: Array.isArray(g.cars) ? g.cars : [],
+            color: typeof g.color === 'string' ? g.color : ''
+          }));
           this.renderEditor(); // Render lại nếu đang mở editor
         } else {
           // Nếu Firebase chưa có dữ liệu, thử từ localStorage
           const saved = localStorage.getItem('carMenuConfig');
           if (saved) {
-            this.carGroups = JSON.parse(saved);
+            const parsed = JSON.parse(saved);
+            this.carGroups = parsed.map(g => ({
+              name: g.name,
+              cars: Array.isArray(g.cars) ? g.cars : [],
+              color: typeof g.color === 'string' ? g.color : ''
+            }));
           }
         }
       }).catch((error) => {
@@ -88,14 +105,24 @@ class CarMenuEditor {
         // Fallback về localStorage
         const saved = localStorage.getItem('carMenuConfig');
         if (saved) {
-          this.carGroups = JSON.parse(saved);
+          const parsed = JSON.parse(saved);
+          this.carGroups = parsed.map(g => ({
+            name: g.name,
+            cars: Array.isArray(g.cars) ? g.cars : [],
+            color: typeof g.color === 'string' ? g.color : ''
+          }));
         }
       });
     } else {
       // Fallback về localStorage nếu không có Firebase
       const saved = localStorage.getItem('carMenuConfig');
       if (saved) {
-        this.carGroups = JSON.parse(saved);
+        const parsed = JSON.parse(saved);
+        this.carGroups = parsed.map(g => ({
+          name: g.name,
+          cars: Array.isArray(g.cars) ? g.cars : [],
+          color: typeof g.color === 'string' ? g.color : ''
+        }));
       }
     }
   }
@@ -184,7 +211,8 @@ class CarMenuEditor {
     if (groupName && !this.carGroups.find(g => g.name === groupName)) {
       this.carGroups.push({
         name: groupName,
-        cars: []
+        cars: [],
+        color: ''
       });
       this.saveToStorage();
       this.renderEditor();
@@ -275,6 +303,10 @@ class CarMenuEditor {
             <button class="btn btn-sm btn-outline-secondary" onclick="carMenuEditor.moveGroupDown(${groupIndex})" ${groupIndex === this.carGroups.length - 1 ? 'disabled' : ''} title="Di chuyển nhóm xuống">↓</button>
             <input type="text" class="form-control form-control-sm" style="width: 150px;" value="${group.name}" onchange="carMenuEditor.editGroupNameFromUI(${groupIndex}, this.value)" placeholder="Tên nhóm">
             <span class="badge bg-secondary">${group.cars.length} xe</span>
+            <div class="d-flex align-items-center gap-1">
+              <input type="color" value="${group.color || '#cccccc'}" onchange="carMenuEditor.setGroupColorFromUI(${groupIndex}, this.value)" title="Màu nhóm">
+              <span class="small text-muted">Màu nhóm</span>
+            </div>
           </div>
           <button class="btn btn-sm btn-danger" onclick="carMenuEditor.removeGroup(${groupIndex})" title="Xóa nhóm">Xóa nhóm</button>
         </div>
@@ -339,9 +371,12 @@ class CarMenuEditor {
       if (group.cars.length > 0) {
         const groupDiv = document.createElement('div');
         groupDiv.className = 'mb-2';
-        groupDiv.innerHTML = group.cars.map(car => 
-          `<button class="btn btn-secondary m-1" onclick="selectCarCode('${car}')">${car}</button>`
-        ).join('');
+        const bg = group.color || '';
+        const color = bg ? this.getContrastingTextColor(bg) : '';
+        groupDiv.innerHTML = group.cars.map(car => {
+          const style = bg ? `style=\"background-color:${bg};color:${color};border-color:${bg}\"` : '';
+          return `<button class="btn ${bg ? 'm-1' : 'btn-secondary m-1'}" ${style} onclick="selectCarCode('${car}')">${car}</button>`;
+        }).join('');
         modalBody.appendChild(groupDiv);
       }
     });
@@ -367,31 +402,38 @@ class CarMenuEditor {
     this.carGroups = [
       {
         name: 'Nhóm A',
-        cars: ['A1', 'A12', 'A13', 'A14', 'A15', 'A16', 'A17', 'A18', 'A19', 'A20', 'AB']
+        cars: ['A1', 'A12', 'A13', 'A14', 'A15', 'A16', 'A17', 'A18', 'A19', 'A20', 'AB'],
+        color: ''
       },
       {
         name: 'Nhóm C', 
-        cars: ['C1', 'C2', 'C3', 'C4', 'CC', 'CX']
+        cars: ['C1', 'C2', 'C3', 'C4', 'CC', 'CX'],
+        color: ''
       },
       {
         name: 'Nhóm M',
-        cars: ['M1', 'M2', 'M3', 'D3']
+        cars: ['M1', 'M2', 'M3', 'D3'],
+        color: ''
       },
       {
         name: 'Nhóm X',
-        cars: ['XĐ', 'XT', 'XV']
+        cars: ['XĐ', 'XT', 'XV'],
+        color: ''
       },
       {
         name: 'Nhóm S',
-        cars: ['S1', 'S2', 'S3', 'S4']
+        cars: ['S1', 'S2', 'S3', 'S4'],
+        color: ''
       },
       {
         name: 'Nhóm số',
-        cars: ['03', '06', '09', '10', '25']
+        cars: ['03', '06', '09', '10', '25'],
+        color: ''
       },
       {
         name: 'Nhóm đặc biệt',
-        cars: ['ĐM', 'ĐC', 'VH']
+        cars: ['ĐM', 'ĐC', 'VH'],
+        color: ''
       }
     ];
     this.saveToStorage(); // Sẽ lưu vào cả localStorage và Firebase
@@ -408,12 +450,41 @@ class CarMenuEditor {
       window.db.ref('carMenuConfig').on('value', (snapshot) => {
         const data = snapshot.val();
         if (data && JSON.stringify(data) !== JSON.stringify(this.carGroups)) {
-          this.carGroups = data;
+          this.carGroups = data.map(g => ({
+            name: g.name,
+            cars: Array.isArray(g.cars) ? g.cars : [],
+            color: typeof g.color === 'string' ? g.color : ''
+          }));
           this.renderEditor(); // Render lại nếu đang mở editor
           // Cập nhật menu xe chính nếu đang mở
           this.updateMainMenu();
         }
       });
+    }
+  }
+
+  // UI helpers
+  setGroupColorFromUI(groupIndex, colorValue) {
+    if (groupIndex >= 0 && groupIndex < this.carGroups.length) {
+      this.carGroups[groupIndex].color = colorValue || '';
+      this.saveToStorage();
+      // Không cần re-render toàn bộ, nhưng để đồng bộ preview thì render lại
+      this.renderEditor();
+    }
+  }
+
+  // Tính màu chữ tương phản (đen hoặc trắng) dựa vào nền
+  getContrastingTextColor(hexColor) {
+    try {
+      const hex = hexColor.replace('#', '');
+      const r = parseInt(hex.substring(0, 2), 16);
+      const g = parseInt(hex.substring(2, 4), 16);
+      const b = parseInt(hex.substring(4, 6), 16);
+      // Công thức luminance đơn giản
+      const luminance = 0.299 * r + 0.587 * g + 0.114 * b;
+      return luminance > 186 ? '#000000' : '#ffffff';
+    } catch (e) {
+      return '#ffffff';
     }
   }
 }
