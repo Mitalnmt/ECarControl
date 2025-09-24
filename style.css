@@ -103,14 +103,14 @@
 #car-list tr.row-selected td {
   background-color: transparent !important;
   box-shadow: none !important;
-  border-top: 2px solid #ff3b30 !important; /* iOS red */
-  border-bottom: 2px solid #ff3b30 !important;
+  border-top: 2px solid #000 !important;
+  border-bottom: 2px solid #000 !important;
 }
 #car-list tr.row-selected td:first-child {
-  border-left: 2px solid #ff3b30 !important;
+  border-left: 2px solid #000 !important;
 }
 #car-list tr.row-selected td:last-child {
-  border-right: 2px solid #ff3b30 !important;
+  border-right: 2px solid #000 !important;
 }
 #car-list tr.row-selected td:first-child::before {
   content: none !important; /* remove previous blue strip */
@@ -259,6 +259,11 @@ body {
   color: #0d6efd;
 }
 
+/* Black outline for selected cars in multi-select modal */
+#multipleCarSelectionContainer button[data-car-code].selected {
+  box-shadow: 0 0 0 2px #000 !important; /* visual black border without layout shift */
+}
+
 /* Responsive adjustments for multiple car selection */
 @media (min-width: 768px) {
   #multipleCarSelectionContainer .btn {
@@ -281,7 +286,7 @@ body {
   bottom: -2px;
   left: 0;
   right: 0;
-  border: 2px solid #ff3b30;
+  border: 2px solid #000;
   border-radius: 4px;
   pointer-events: none;
   z-index: 2;
@@ -313,7 +318,7 @@ body {
   right: 1px;
   bottom: 1px;
   left: 1px;
-  border: 2px solid #ff3b30;
+  border: 2px solid #000;
   pointer-events: none;
   border-radius: 3px;
   z-index: 3;
@@ -329,4 +334,18 @@ body {
   pointer-events: none;
   border-radius: 3px;
   z-index: 3;
+}
+
+/* Force black text for menu buttons */
+#bottomBar .btn,
+#carModal .btn,
+#selectMultipleModal .btn,
+#settingsModal .btn,
+#carMenuEditorModal .btn,
+#rowActionModal .btn,
+#timeModal .btn,
+#multiTimeModal .btn,
+#multiNoteModal .btn,
+#selectionBar .btn {
+  color: #000 !important;
 }

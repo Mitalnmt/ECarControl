@@ -126,7 +126,7 @@ class MultipleCarSelection {
     const color = bg ? this.getContrastingTextColor(bg) : '';
     const style = bg ? `style=\"background-color:${bg};color:${color};border-color:${bg}\"` : '';
     return `
-      <button class="btn ${bg ? '' : (isSelected ? 'btn-primary' : 'btn-secondary')} m-1" 
+      <button class="btn ${bg ? '' : (isSelected ? 'btn-primary' : 'btn-secondary')} m-1${isSelected ? ' selected' : ''}" 
               ${style}
               onclick="multipleCarSelection.toggleCarSelection('${car}')"
               data-car-code="${car}">
@@ -142,6 +142,7 @@ class MultipleCarSelection {
     if (this.selectedCars.has(carCode)) {
       this.selectedCars.delete(carCode);
       if (button) {
+        button.classList.remove('selected');
         if (!button.getAttribute('style')) {
           button.classList.remove('btn-primary');
           button.classList.add('btn-secondary');
@@ -150,6 +151,7 @@ class MultipleCarSelection {
     } else {
       this.selectedCars.add(carCode);
       if (button) {
+        button.classList.add('selected');
         if (!button.getAttribute('style')) {
           button.classList.remove('btn-secondary');
           button.classList.add('btn-primary');
@@ -168,6 +170,7 @@ class MultipleCarSelection {
           this.selectedCars.add(car);
           const button = document.querySelector(`button[data-car-code="${car}"]`);
           if (button) {
+            button.classList.add('selected');
             if (!button.getAttribute('style')) {
               button.classList.remove('btn-secondary');
               button.classList.add('btn-primary');
@@ -187,6 +190,7 @@ class MultipleCarSelection {
     // Reset tất cả button về trạng thái không chọn
     const buttons = document.querySelectorAll('button[data-car-code]');
     buttons.forEach(button => {
+      button.classList.remove('selected');
       if (!button.getAttribute('style')) {
         button.classList.remove('btn-primary');
         button.classList.add('btn-secondary');
