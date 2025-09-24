@@ -7,14 +7,10 @@ class MultipleCarSelection {
     this.groupColorPalette = [
       '#1e88e5', // blue 600
       '#8e24aa', // purple 600
-      '#00897b', // teal 600
       '#f4511e', // deep orange 600
-      '#6d4c41', // brown 600
       '#3949ab', // indigo 600
-      '#00acc1', // cyan 600
       '#c2185b', // pink 700
       '#2e7d32', // green 800 (dark enough on yellow)
-      '#455a64'  // blue gray 600
     ];
     this.groupColorIndexKey = 'groupColorIndex';
     this.init();

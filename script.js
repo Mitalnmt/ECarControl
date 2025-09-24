@@ -227,12 +227,11 @@ function renderCarList() {
 
     // Trạng thái
     const cell2 = row.insertCell(1);
-    // Nút trạng thái: 'C' (vàng) hoặc 'R' (xanh) + nút Đổi cùng hàng
+    // Nút trạng thái: 'C' (vàng) hoặc 'R' (xanh)
     const isPaid = car.paid;
     let statusHtml = `<button class="btn btn-status btn-sm ${isPaid ? 'btn-success' : 'btn-warning'}" onclick="togglePaid(${index})">${isPaid ? 'R' : 'C'}</button>`;
-    statusHtml += ` <button class="btn btn-secondary btn-sm" onclick="changeCarCode(${index})">Đổi</button>`;
     if (car.note) {
-      statusHtml += ` <span class='car-note'>${car.note}</span>`;
+      statusHtml += ` <div class='car-note'>${car.note}</div>`;
     }
     cell2.innerHTML = statusHtml;
 
@@ -242,9 +241,10 @@ function renderCarList() {
     if (car.groupColor) {
       colorStyle = `color: ${car.groupColor};`;
     }
-    let carCodeHtml = `<span style="font-size: 1.2em; font-weight: bold; ${colorStyle}">${car.carCode}</span>`;
+    const borderStyle = car.groupColor ? `border-color: ${car.groupColor};` : '';
+    let carCodeHtml = `<button class="btn btn-sm btn-outline-secondary car-code-btn" style="${colorStyle}${borderStyle}" onclick="changeCarCode(${index})">${car.carCode}</button>`;
     if (car.oldCarCodes && car.oldCarCodes.length > 0) {
-      carCodeHtml += ` <span class='old-car-code-italic'>(` + car.oldCarCodes.map(code => `${code}`).join(', ') + `)</span>`;
+      carCodeHtml += ` <div class='old-car-code-italic'>(` + car.oldCarCodes.map(code => `${code}`).join(', ') + `)</div>`;
     }
     cell3.innerHTML = carCodeHtml;
 

@@ -84,6 +84,24 @@
   padding: 4px 8px;
 }
 
+/* Compact status column */
+#car-list td:nth-child(2) {
+  width: 80px;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  line-height: 1.1;
+}
+#car-list td:nth-child(2) .btn-status {
+  min-width: 1.8em;
+  font-size: 0.85em;
+  padding: 0.15em 0.5em;
+}
+#car-list td:nth-child(2) .car-note {
+  margin-left: 0;
+  margin-top: 2px;
+  font-size: 0.8em;
+}
+
 /* Styling cho cột thời gian - giảm kích thước font */
 #car-list td:nth-child(4) {
   font-size: 0.9em;
@@ -97,6 +115,8 @@
   font-size: 0.7em !important;
   font-style: italic !important;
   color: #90a4ae !important;
+  display: block;
+  margin-top: 4px;
 }
 
 /* Row selected - red outline */
@@ -135,6 +155,16 @@
   color: #888;
   font-style: italic;
   margin-left: 6px;
+  display: block;
+  margin-top: 4px;
+}
+
+/* Button hiển thị mã xe để mở đổi xe */
+.car-code-btn {
+  font-weight: bold;
+  min-width: 3.2em;
+  padding: 2px 8px;
+  line-height: 1.2;
 }
 
 #bottomBar {
