@@ -264,20 +264,38 @@
     </table>
   </div>
 
+  <!-- Floating bottom bar for Multiple Car Selection modal -->
+  <div id="multiSelectBottomBar" style="display:none; position:fixed; left:0; right:0; bottom:0; z-index:10001; background:#fff; border-top: 1px solid rgba(0,0,0,0.08); padding: 8px 12px; box-shadow: 0 -4px 20px rgba(0,0,0,0.08); height: 60px;">
+    <div class="container d-flex justify-content-center align-items-center w-100" style="gap:12px;">
+      <button class="btn btn-success" id="multiSelectGroupBtn" onclick="window.multipleCarSelection && window.multipleCarSelection.addSelectedCarsAsGroup()" disabled>
+        <i class="fas fa-layer-group"></i> Gộp thành nhóm
+      </button>
+      <button class="btn btn-primary" id="multiSelectAddBtn" onclick="window.multipleCarSelection && window.multipleCarSelection.addSelectedCarsIndividually()" disabled>
+        <i class="fas fa-plus"></i> Thêm riêng lẻ
+      </button>
+    </div>
+  </div>
+
   <!-- Bottom bar with floating design -->
   <div id="bottomBar">
-    <button class="btn btn-secondary btn-sm" id="settingsBtn">Cài đặt</button>
-    <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#carModal">
-      <i class="fas fa-car"></i> Chọn Xe
-    </button>
-    <button class="btn btn-info btn-sm" data-bs-toggle="modal" data-bs-target="#selectMultipleModal">Chọn Nhiều</button>
+    <div class="d-flex align-items-center" style="flex:1; gap:8px;">
+      <button class="btn btn-secondary btn-sm" id="settingsBtn">Cài đặt</button>
+    </div>
+    <div class="d-flex justify-content-center align-items-center" style="flex:1;">
+      <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#selectMultipleModal">
+        <i class="fas fa-car"></i> Chọn Xe
+      </button>
+    </div>
+    <div class="d-flex justify-content-end align-items-center" style="flex:1; gap:8px;">
+      <button class="btn btn-info btn-sm" id="activateMultiSelectBtn">Select</button>
+    </div>
   </div>
 
   <!-- Virtual spacer to prevent content from being hidden behind floating bottom bar -->
   <div id="bottomSpacer"></div>
 
   <!-- Floating selection action bar -->
-  <div id="selectionBar" class="shadow-sm" style="display:none; position:fixed; left:0; right:0; bottom:60px; z-index:10000; background: rgba(255,255,255,0.97); backdrop-filter: blur(8px); border-top: 1px solid rgba(0,0,0,0.08); padding: 8px 12px;">
+  <div id="selectionBar" class="shadow-sm" style="display:none; position:fixed; left:0; right:0; bottom:0; z-index:10000; background: rgba(255,255,255,0.97); backdrop-filter: blur(8px); border-top: 1px solid rgba(0,0,0,0.08); padding: 8px 12px; box-shadow: 0 -4px 20px rgba(0,0,0,0.08); height: 60px;">
     <div class="container d-flex justify-content-between align-items-center">
       <div>
         <span>Đã chọn: <b id="selectionCount">0</b> dòng</span>
@@ -459,7 +477,7 @@
           </div>
 
           <div class="mb-3">
-            <button class="btn btn-outline-primary" id="activateMultiSelectBtn">Chọn nhiều dòng</button>
+            <!-- Removed redundant 'Chọn nhiều dòng' button in settings -->
           </div>
 
         </div>
@@ -507,6 +525,9 @@
           </div>
         </div>
         <div class="modal-footer">
+          <div id="trashBin" class="trash-bin" ondragover="carMenuEditor.onTrashDragOver(event)" ondrop="carMenuEditor.onTrashDrop(event)">
+            🗑️ Thùng rác
+          </div>
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
           <button type="button" class="btn btn-primary" id="applyCarMenuChangesBtn">Áp dụng thay đổi</button>
         </div>

@@ -283,9 +283,6 @@ class CarMenuEditor {
           <h6 class="mb-1">Quản lý Menu Xe</h6>
           <p class="text-muted small mb-0">Kéo thả các nút để sắp xếp, kéo vào thùng rác để xóa. Nhấn vào tiêu đề nhóm để đổi tên. Thêm xe bằng ô nhập bên dưới mỗi nhóm.</p>
         </div>
-        <div id="trashBin" class="trash-bin" ondragover="carMenuEditor.onTrashDragOver(event)" ondrop="carMenuEditor.onTrashDrop(event)">
-          🗑️ Thùng rác
-        </div>
       </div>
       <div id="carGroupsContainer">
         ${this.carGroups.map((group, groupIndex) => this.renderGroup(group, groupIndex)).join('')}

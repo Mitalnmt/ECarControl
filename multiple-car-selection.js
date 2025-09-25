@@ -99,16 +99,6 @@ class MultipleCarSelection {
             <button class="btn btn-sm btn-outline-secondary" onclick="multipleCarSelection.clearAllSelection()">Bỏ chọn tất cả</button>
           </div>
         </div>
-        <div class="mb-3" id="groupingOptions">
-          <div class="d-flex gap-2">
-            <button class="btn btn-sm btn-success" onclick="multipleCarSelection.addSelectedCarsAsGroup()">
-              <i class="fas fa-layer-group"></i> Gộp thành nhóm
-            </button>
-            <button class="btn btn-sm btn-primary" onclick="multipleCarSelection.addSelectedCarsIndividually()">
-              <i class="fas fa-plus"></i> Thêm riêng lẻ
-            </button>
-          </div>
-        </div>
       </div>
       ${this.carGroups.map((group, groupIndex) => this.renderGroup(group, groupIndex)).join('')}
       ${this.carGroups.length === 0 ? '<p class="text-muted text-center">Chưa có nhóm xe nào.</p>' : ''}
@@ -219,6 +209,14 @@ class MultipleCarSelection {
     if (selectedCountElement) {
       selectedCountElement.textContent = this.selectedCars.size;
     }
+
+    // Also sync floating bar buttons in modal if present
+    try {
+      const groupBtn = document.getElementById('multiSelectGroupBtn');
+      const addBtn = document.getElementById('multiSelectAddBtn');
+      if (groupBtn) groupBtn.disabled = this.selectedCars.size < 2;
+      if (addBtn) addBtn.disabled = this.selectedCars.size === 0;
+    } catch (_) {}
   }
 
   // Thêm các xe đã chọn vào danh sách (hàm cũ - giữ để tương thích)

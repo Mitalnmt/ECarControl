@@ -1112,6 +1112,9 @@ if (activateMultiSelectBtn) {
     const table = document.getElementById('car-list');
     if (table) table.classList.add('select-mode');
     if (settingsModal) settingsModal.hide();
+    // Force show overlay selection bar (mobile safe)
+    const selBar = document.getElementById('selectionBar');
+    if (selBar) selBar.style.display = 'flex';
     showToast('Đã bật chế độ chọn dòng. Chạm vào dòng để chọn/xóa.', 'info');
   });
 }
@@ -1394,6 +1397,23 @@ document.addEventListener('DOMContentLoaded', function() {
   if (fullscreenBtn) {
     fullscreenBtn.addEventListener('click', function() {
       toggleFullscreen();
+    });
+  }
+
+  // Show/hide floating bar for multi-select modal
+  const selectMultipleModalEl = document.getElementById('selectMultipleModal');
+  const multiSelectBottomBar = document.getElementById('multiSelectBottomBar');
+  const multiSelectGroupBtn = document.getElementById('multiSelectGroupBtn');
+  const multiSelectAddBtn = document.getElementById('multiSelectAddBtn');
+  if (selectMultipleModalEl && multiSelectBottomBar) {
+    selectMultipleModalEl.addEventListener('show.bs.modal', function() {
+      multiSelectBottomBar.style.display = 'block'; // overlay current bottom bar
+      const size = (window.multipleCarSelection && window.multipleCarSelection.selectedCars) ? window.multipleCarSelection.selectedCars.size : 0;
+      if (multiSelectGroupBtn) multiSelectGroupBtn.disabled = size < 2;
+      if (multiSelectAddBtn) multiSelectAddBtn.disabled = size === 0;
+    });
+    selectMultipleModalEl.addEventListener('hidden.bs.modal', function() {
+      multiSelectBottomBar.style.display = 'none';
     });
   }
 });

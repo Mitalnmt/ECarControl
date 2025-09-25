@@ -376,7 +376,10 @@ body {
 /* Selection bar responsive adjustments */
 #selectionBar {
   padding: 8px 12px !important;
-  bottom: 60px !important;
+  bottom: 0 !important;
+  height: 60px;
+  z-index: 10002 !important;
+  background: #fff;
 }
 
 #selectionBar .d-flex {
@@ -444,6 +447,40 @@ body {
   }
   
   /* Text đã được ẩn bằng Bootstrap class d-none d-md-inline */
+}
+
+/* Multiple select modal floating bottom bar - overlay current bottom bar */
+#multiSelectBottomBar {
+  height: 60px;
+  z-index: 10002 !important;
+  background: #fff;
+}
+#multiSelectBottomBar .container {
+  height: 100%;
+}
+#multiSelectBottomBar .btn {
+  font-size: 0.95rem;
+  padding: 8px 14px;
+}
+
+@media (max-width: 768px) {
+  #multiSelectBottomBar {
+    height: 58px;
+  }
+  #multiSelectBottomBar .btn {
+    font-size: 0.9rem;
+    padding: 8px 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  #multiSelectBottomBar {
+    height: 56px;
+  }
+  #multiSelectBottomBar .btn {
+    font-size: 0.9rem;
+    padding: 8px 12px;
+  }
 }
 
 /* Red overlay border for selected rows */
