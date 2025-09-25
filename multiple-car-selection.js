@@ -19,7 +19,7 @@ class MultipleCarSelection {
   init() {
     this.loadCarGroups();
     this.setupEventListeners();
-  }
+  } 
 
   // Lấy cấu hình menu xe từ car menu editor
   loadCarGroups() {

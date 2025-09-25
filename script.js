@@ -14,7 +14,7 @@ let undoHistory = []; // Lưu lịch sử các thao tác
 let maxUndoSteps = 20; // Số bước undo tối đa
 let undoInProgress = false; // Cờ để tránh undo liên tiếp
 
- 
+  
 
 // Hàm lưu trạng thái hiện tại vào lịch sử
 function saveToHistory() {

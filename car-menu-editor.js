@@ -6,7 +6,7 @@ class CarMenuEditor {
         name: 'Nhóm A',
         cars: ['A1', 'A12', 'A13', 'A14', 'A15', 'A16', 'A17', 'A18', 'A19', 'A20', 'AB'],
         color: ''
-      },
+      }, 
       {
         name: 'Nhóm C', 
         cars: ['C1', 'C2', 'C3', 'C4', 'CC', 'CX'],
