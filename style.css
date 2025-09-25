@@ -86,20 +86,21 @@
 
 /* Compact status column */
 #car-list td:nth-child(2) {
-  width: 80px;
-  padding-top: 4px;
-  padding-bottom: 4px;
+  width: 60px;
+  padding: 2px 4px;
   line-height: 1.1;
+  text-align: center;
 }
 #car-list td:nth-child(2) .btn-status {
-  min-width: 1.8em;
-  font-size: 0.85em;
-  padding: 0.15em 0.5em;
+  min-width: 1.5em;
+  font-size: 0.8em;
+  padding: 0.1em 0.3em;
+  margin: 0;
 }
 #car-list td:nth-child(2) .car-note {
-  margin-left: 0;
-  margin-top: 2px;
-  font-size: 0.8em;
+  margin: 1px 0 0 0;
+  font-size: 0.7em;
+  text-align: center;
 }
 
 /* Styling cho cột thời gian - giảm kích thước font */
