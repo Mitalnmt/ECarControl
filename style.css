@@ -86,16 +86,18 @@
 
 /* Compact status column */
 #car-list td:nth-child(2) {
-  width: 60px;
-  padding: 2px 4px;
+  width: 70px;
+  padding: 4px 6px;
   line-height: 1.1;
   text-align: center;
 }
 #car-list td:nth-child(2) .btn-status {
-  min-width: 1.5em;
-  font-size: 0.8em;
-  padding: 0.1em 0.3em;
+  min-width: 2.2em;
+  font-size: 0.9em;
+  padding: 0.25em 0.5em;
   margin: 0;
+  display: block;
+  width: 100%;
 }
 #car-list td:nth-child(2) .car-note {
   margin: 1px 0 0 0;
@@ -369,6 +371,79 @@ body {
     min-width: 70px;
     padding: 10px 15px;
   }
+}
+
+/* Selection bar responsive adjustments */
+#selectionBar {
+  padding: 8px 12px !important;
+  bottom: 60px !important;
+}
+
+#selectionBar .d-flex {
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+#selectionBar .btn {
+  font-size: 0.9rem;
+  padding: 6px 10px;
+  white-space: nowrap;
+  margin: 1px;
+  min-width: auto;
+}
+
+@media (max-width: 768px) {
+  #selectionBar {
+    padding: 6px 10px !important;
+    bottom: 55px !important;
+  }
+  
+  #selectionBar .container {
+    padding: 0 !important;
+  }
+  
+  #selectionBar .d-flex {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 3px;
+  }
+  
+  #selectionBar .btn {
+    font-size: 0.8rem;
+    padding: 4px 8px;
+    margin: 1px;
+    min-width: auto;
+    flex: 0 0 auto;
+  }
+  
+  #selectionBar .btn i {
+    font-size: 0.8rem;
+  }
+  
+  /* Giảm kích thước text */
+  #selectionBar span {
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 480px) {
+  #selectionBar {
+    padding: 4px 8px !important;
+    bottom: 50px !important;
+  }
+  
+  #selectionBar .btn {
+    font-size: 0.75rem;
+    padding: 3px 6px;
+    margin: 1px;
+  }
+  
+  #selectionBar .btn i {
+    font-size: 0.7rem;
+  }
+  
+  /* Text đã được ẩn bằng Bootstrap class d-none d-md-inline */
 }
 
 /* Red overlay border for selected rows */

@@ -99,6 +99,16 @@ class MultipleCarSelection {
             <button class="btn btn-sm btn-outline-secondary" onclick="multipleCarSelection.clearAllSelection()">Bỏ chọn tất cả</button>
           </div>
         </div>
+        <div class="mb-3" id="groupingOptions">
+          <div class="d-flex gap-2">
+            <button class="btn btn-sm btn-success" onclick="multipleCarSelection.addSelectedCarsAsGroup()">
+              <i class="fas fa-layer-group"></i> Gộp thành nhóm
+            </button>
+            <button class="btn btn-sm btn-primary" onclick="multipleCarSelection.addSelectedCarsIndividually()">
+              <i class="fas fa-plus"></i> Thêm riêng lẻ
+            </button>
+          </div>
+        </div>
       </div>
       ${this.carGroups.map((group, groupIndex) => this.renderGroup(group, groupIndex)).join('')}
       ${this.carGroups.length === 0 ? '<p class="text-muted text-center">Chưa có nhóm xe nào.</p>' : ''}
@@ -205,12 +215,13 @@ class MultipleCarSelection {
   // Cập nhật số lượng xe đã chọn
   updateSelectedCount() {
     const selectedCountElement = document.getElementById('selectedCount');
+    
     if (selectedCountElement) {
       selectedCountElement.textContent = this.selectedCars.size;
     }
   }
 
-  // Thêm các xe đã chọn vào danh sách
+  // Thêm các xe đã chọn vào danh sách (hàm cũ - giữ để tương thích)
   addSelectedCars() {
     if (this.selectedCars.size === 0) {
       if (typeof showToast === 'function') {
@@ -253,6 +264,76 @@ class MultipleCarSelection {
     // Hiển thị thông báo
     if (typeof showToast === 'function') {
       showToast(`Đã thêm ${this.selectedCars.size} xe vào danh sách!`, 'success');
+    }
+
+    // Reset selection
+    this.selectedCars.clear();
+  }
+
+  // Thêm các xe đã chọn thành một nhóm
+  addSelectedCarsAsGroup() {
+    if (this.selectedCars.size < 2) {
+      if (typeof showToast === 'function') {
+        showToast('Cần chọn ít nhất 2 xe để gộp thành nhóm!', 'warning');
+      }
+      return;
+    }
+
+    // Tạo group id và lấy màu kế tiếp trong bảng màu
+    const groupId = Date.now();
+    let idx = Number(localStorage.getItem(this.groupColorIndexKey));
+    if (Number.isNaN(idx) || idx < 0) idx = 0;
+    const color = this.groupColorPalette[idx % this.groupColorPalette.length];
+    localStorage.setItem(this.groupColorIndexKey, String((idx + 1) % this.groupColorPalette.length));
+    const groupMeta = { groupId, groupColor: color };
+
+    // Thêm từng xe đã chọn với cùng group meta
+    this.selectedCars.forEach(carCode => {
+      if (typeof addCar === 'function') {
+        addCar(carCode, groupMeta);
+      }
+    });
+
+    // Đóng modal
+    const modal = bootstrap.Modal.getInstance(document.getElementById('selectMultipleModal'));
+    if (modal) {
+      modal.hide();
+    }
+
+    // Hiển thị thông báo
+    if (typeof showToast === 'function') {
+      showToast(`Đã gộp ${this.selectedCars.size} xe thành một nhóm!`, 'success');
+    }
+
+    // Reset selection
+    this.selectedCars.clear();
+  }
+
+  // Thêm các xe đã chọn riêng lẻ (không gộp)
+  addSelectedCarsIndividually() {
+    if (this.selectedCars.size === 0) {
+      if (typeof showToast === 'function') {
+        showToast('Vui lòng chọn ít nhất một xe!', 'warning');
+      }
+      return;
+    }
+
+    // Thêm từng xe đã chọn riêng lẻ
+    this.selectedCars.forEach(carCode => {
+      if (typeof addCar === 'function') {
+        addCar(carCode);
+      }
+    });
+
+    // Đóng modal
+    const modal = bootstrap.Modal.getInstance(document.getElementById('selectMultipleModal'));
+    if (modal) {
+      modal.hide();
+    }
+
+    // Hiển thị thông báo
+    if (typeof showToast === 'function') {
+      showToast(`Đã thêm ${this.selectedCars.size} xe riêng lẻ vào danh sách!`, 'success');
     }
 
     // Reset selection

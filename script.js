@@ -7,6 +7,9 @@ let xStepMinutes = 15; // Bước tăng/giảm cho nút -1x/+1x (phút)
 
 // Trạng thái chọn nhiều dòng
 let selectedIds = new Set();
+
+// Test script loading
+console.log('Script.js loaded successfully');
 let multiSelectMode = false; // Bật/tắt chọn nhiều bằng click dòng (kích hoạt 1 lần)
 
 // Biến cho chức năng undo
@@ -640,6 +643,15 @@ function deleteSelectedRows() {
   updateSelectionBar();
 }
 
+// Thoát chế độ chọn nhiều
+function exitMultiSelectMode() {
+  multiSelectMode = false;
+  selectedIds.clear();
+  updateSelectionBar();
+  renderCarList();
+  showToast('Đã thoát chế độ chọn nhiều dòng!', 'info');
+}
+
 // Cập nhật thanh tác vụ chọn nhiều
 function updateSelectionBar() {
   const bar = document.getElementById('selectionBar');
@@ -647,28 +659,43 @@ function updateSelectionBar() {
   const deleteBtn = document.getElementById('selectionDeleteBtn');
   const timeBtn = document.getElementById('selectionTimeBtn');
   const noteBtn = document.getElementById('selectionNoteBtn');
+  const groupBtn = document.getElementById('selectionGroupBtn');
+  const ungroupBtn = document.getElementById('selectionUngroupBtn');
+  
   if (!bar || !countEl || !deleteBtn) return;
+  
   if (!multiSelectMode) {
     bar.style.display = 'none';
     deleteBtn.disabled = true;
     if (timeBtn) timeBtn.disabled = true;
     if (noteBtn) noteBtn.disabled = true;
+    if (groupBtn) groupBtn.disabled = true;
+    if (ungroupBtn) ungroupBtn.disabled = true;
     const table = document.getElementById('car-list');
     if (table) table.classList.remove('select-mode');
     return;
   }
+  
+  // Luôn hiển thị thanh khi ở chế độ chọn nhiều
+  bar.style.display = 'flex';
+  
   const count = selectedIds.size;
   countEl.textContent = count;
-  if (count > 0) {
-    bar.style.display = 'flex';
-    deleteBtn.disabled = false;
-    if (timeBtn) timeBtn.disabled = false;
-    if (noteBtn) noteBtn.disabled = false;
-  } else {
-    bar.style.display = 'none';
-    deleteBtn.disabled = true;
-    if (timeBtn) timeBtn.disabled = true;
-    if (noteBtn) noteBtn.disabled = true;
+  
+  // Enable/disable các nút dựa trên số lượng xe đã chọn
+  deleteBtn.disabled = count === 0;
+  if (timeBtn) timeBtn.disabled = count === 0;
+  if (noteBtn) noteBtn.disabled = count === 0;
+  
+  // Logic cho nút gộp/tách xe
+  if (groupBtn) {
+    groupBtn.disabled = count < 2; // Cần ít nhất 2 xe để gộp
+  }
+  if (ungroupBtn) {
+    // Kiểm tra xem có xe nào có nhóm không
+    const selectedCars = carList.filter(car => selectedIds.has(car.id));
+    const hasGroupedCars = selectedCars.some(car => car.groupId);
+    ungroupBtn.disabled = !hasGroupedCars;
   }
 }
 
@@ -1089,6 +1116,8 @@ if (activateMultiSelectBtn) {
   });
 }
 
+// Event listeners cho nút gộp/tách xe đã được di chuyển vào selection bar
+
 // Event listener cho nút xuất danh sách xe
 if (exportCarsBtn) {
   exportCarsBtn.addEventListener('click', function() {
@@ -1421,4 +1450,153 @@ function updateFullscreenIcon() {
     `;
     fullscreenBtn.title = 'Toàn màn hình';
   }
+}
+
+// Hàm gộp các xe đã chọn thành nhóm
+function groupSelectedCars() {
+  console.log('groupSelectedCars called');
+  console.log('selectedIds:', selectedIds);
+  console.log('selectedIds.size:', selectedIds.size);
+  
+  if (selectedIds.size < 2) {
+    showToast('Cần chọn ít nhất 2 xe để gộp thành nhóm!', 'warning');
+    return;
+  }
+
+  // Lấy danh sách xe đã chọn
+  const selectedCars = carList.filter(car => selectedIds.has(car.id));
+  
+  // Kiểm tra logic gộp nhóm thông minh
+  const carsWithGroup = selectedCars.filter(car => car.groupId);
+  const carsWithoutGroup = selectedCars.filter(car => !car.groupId);
+  
+  // Lấy danh sách các nhóm khác nhau
+  const uniqueGroups = new Set();
+  carsWithGroup.forEach(car => {
+    if (car.groupId) {
+      uniqueGroups.add(car.groupId);
+    }
+  });
+  
+  let targetGroupId = null;
+  let targetGroupColor = null;
+  
+  if (uniqueGroups.size > 1) {
+    // Có xe từ nhiều nhóm khác nhau
+    const groupNames = Array.from(uniqueGroups).map(groupId => {
+      const groupCars = carsWithGroup.filter(car => car.groupId === groupId);
+      return `Nhóm ${groupId} (${groupCars.length} xe)`;
+    }).join(', ');
+    
+    const confirmMessage = `Các xe đã chọn thuộc ${uniqueGroups.size} nhóm khác nhau:\n${groupNames}\n\nBạn có muốn gộp tất cả vào nhóm đầu tiên không?`;
+    
+    if (!confirm(confirmMessage)) {
+      showToast('Đã hủy gộp xe!', 'info');
+      return;
+    }
+    
+    // Sử dụng nhóm đầu tiên làm nhóm đích
+    const firstGroupId = Array.from(uniqueGroups)[0];
+    const firstGroupCar = carsWithGroup.find(car => car.groupId === firstGroupId);
+    targetGroupId = firstGroupCar.groupId;
+    targetGroupColor = firstGroupCar.groupColor;
+    
+  } else if (uniqueGroups.size === 1) {
+    // Tất cả xe có nhóm đều cùng một nhóm
+    const firstGroupedCar = carsWithGroup[0];
+    targetGroupId = firstGroupedCar.groupId;
+    targetGroupColor = firstGroupedCar.groupColor;
+    
+  } else {
+    // Tất cả xe đều chưa có nhóm, tạo nhóm mới
+    targetGroupId = Date.now();
+    targetGroupColor = getNextAvailableGroupColor();
+  }
+
+  // Cập nhật tất cả xe đã chọn với cùng groupId và groupColor
+  selectedCars.forEach(car => {
+    car.groupId = targetGroupId;
+    car.groupColor = targetGroupColor;
+  });
+
+  // Cập nhật giao diện
+  renderCarList();
+  updateSelectionBar();
+  
+  // Lưu vào Firebase
+  saveCarListToStorage(false);
+  
+  const groupInfo = uniqueGroups.size > 1 ? 
+    `đã gộp ${selectedCars.length} xe từ ${uniqueGroups.size} nhóm khác nhau` : 
+    `đã gộp ${selectedCars.length} xe thành một nhóm`;
+  
+  showToast(groupInfo, 'success');
+}
+
+// Hàm tách nhóm các xe đã chọn
+function ungroupSelectedCars() {
+  if (selectedIds.size === 0) {
+    showToast('Vui lòng chọn ít nhất một xe để tách nhóm!', 'warning');
+    return;
+  }
+
+  // Lấy danh sách xe đã chọn
+  const selectedCars = carList.filter(car => selectedIds.has(car.id));
+  
+  // Kiểm tra xem có xe nào có nhóm không
+  const carsWithGroup = selectedCars.filter(car => car.groupId);
+  if (carsWithGroup.length === 0) {
+    showToast('Các xe đã chọn chưa có nhóm!', 'warning');
+    return;
+  }
+
+  // Tách nhóm cho tất cả xe đã chọn
+  selectedCars.forEach(car => {
+    car.groupId = null;
+    car.groupColor = null;
+  });
+
+  // Cập nhật giao diện
+  renderCarList();
+  updateSelectionBar();
+  
+  // Lưu vào Firebase
+  saveCarListToStorage(false);
+  
+  showToast(`Đã tách nhóm cho ${selectedCars.length} xe!`, 'success');
+}
+
+// Hàm lấy màu nhóm tiếp theo (không trùng với nhóm xe đi chung)
+function getNextAvailableGroupColor() {
+  // Màu sắc cho nhóm xe đi chung (khác với nhóm xe đã ra)
+  const groupColors = [
+    '#1e88e5', // blue 600
+    '#8e24aa', // purple 600
+    '#f4511e', // deep orange 600
+    '#3949ab', // indigo 600
+    '#c2185b', // pink 700
+    '#2e7d32', // green 800
+    '#d32f2f', // red 700
+    '#f57c00', // orange 700
+    '#5d4037', // brown 700
+    '#455a64', // blue grey 700
+  ];
+
+  // Lấy danh sách màu đã sử dụng
+  const usedColors = new Set();
+  carList.forEach(car => {
+    if (car.groupColor) {
+      usedColors.add(car.groupColor);
+    }
+  });
+
+  // Tìm màu chưa sử dụng
+  for (const color of groupColors) {
+    if (!usedColors.has(color)) {
+      return color;
+    }
+  }
+
+  // Nếu tất cả màu đã dùng, quay lại màu đầu tiên
+  return groupColors[0];
 }

@@ -282,12 +282,28 @@
       <div>
         <span>Đã chọn: <b id="selectionCount">0</b> dòng</span>
       </div>
-      <div class="d-flex gap-2">
-        <button class="btn btn-sm btn-outline-secondary" onclick="clearSelection()">Bỏ chọn</button>
-        <button class="btn btn-sm btn-outline-primary" onclick="selectAllRows()">Chọn tất cả</button>
-        <button class="btn btn-sm btn-info" id="selectionTimeBtn" onclick="editTimeForSelectedCars()" disabled>Chỉnh thời gian</button>
-        <button class="btn btn-sm btn-secondary" id="selectionNoteBtn" onclick="editNoteForSelectedCars()" disabled>Ghi chú</button>
-        <button class="btn btn-sm btn-danger" id="selectionDeleteBtn" onclick="deleteSelectedRows()" disabled>Xóa đã chọn</button>
+      <div class="d-flex gap-2 flex-wrap">
+        <button class="btn btn-sm btn-outline-secondary" onclick="clearSelection()">
+          <i class="fas fa-times"></i><span class="d-none d-md-inline"> Bỏ chọn</span>
+        </button>
+        <button class="btn btn-sm btn-outline-primary" onclick="selectAllRows()">
+          <i class="fas fa-check-double"></i><span class="d-none d-md-inline"> Chọn tất cả</span>
+        </button>
+        <button class="btn btn-sm btn-success" id="selectionGroupBtn" onclick="groupSelectedCars()" disabled>
+          <i class="fas fa-layer-group"></i><span class="d-none d-md-inline"> Gộp xe</span>
+        </button>
+        <button class="btn btn-sm btn-warning" id="selectionUngroupBtn" onclick="ungroupSelectedCars()" disabled>
+          <i class="fas fa-layer-group"></i><span class="d-none d-md-inline"> Tách nhóm</span>
+        </button>
+        <button class="btn btn-sm btn-info" id="selectionTimeBtn" onclick="editTimeForSelectedCars()" disabled>
+          <i class="fas fa-clock"></i><span class="d-none d-md-inline"> Chỉnh thời gian</span>
+        </button>
+        <button class="btn btn-sm btn-secondary" id="selectionNoteBtn" onclick="editNoteForSelectedCars()" disabled>
+          <i class="fas fa-sticky-note"></i><span class="d-none d-md-inline"> Ghi chú</span>
+        </button>
+        <button class="btn btn-sm btn-danger" id="selectionDeleteBtn" onclick="deleteSelectedRows()" disabled>
+          <i class="fas fa-trash"></i><span class="d-none d-md-inline"> Xóa đã chọn</span>
+        </button>
       </div>
     </div>
   </div>
@@ -445,6 +461,7 @@
           <div class="mb-3">
             <button class="btn btn-outline-primary" id="activateMultiSelectBtn">Chọn nhiều dòng</button>
           </div>
+
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-warning" id="backBtn" title="Quay lại (Ctrl+Z)">← Back</button>
@@ -511,8 +528,7 @@
           </div>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
-          <button type="button" class="btn btn-primary" id="addSelectedCarsBtn">Thêm xe đã chọn</button>
+          <!-- Buttons removed - using inline grouping options instead -->
         </div>
       </div>
     </div>
