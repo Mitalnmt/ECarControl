@@ -657,45 +657,60 @@ function updateSelectionBar() {
   const bar = document.getElementById('selectionBar');
   const countEl = document.getElementById('selectionCount');
   const deleteBtn = document.getElementById('selectionDeleteBtn');
+  const deleteBtnDesktop = document.getElementById('selectionDeleteBtnDesktop');
   const timeBtn = document.getElementById('selectionTimeBtn');
+  const timeBtnDesktop = document.getElementById('selectionTimeBtnDesktop');
   const noteBtn = document.getElementById('selectionNoteBtn');
+  const noteBtnDesktop = document.getElementById('selectionNoteBtnDesktop');
   const groupBtn = document.getElementById('selectionGroupBtn');
+  const groupBtnDesktop = document.getElementById('selectionGroupBtnDesktop');
   const ungroupBtn = document.getElementById('selectionUngroupBtn');
+  const ungroupBtnDesktop = document.getElementById('selectionUngroupBtnDesktop');
+  const selectBtn = document.getElementById('activateMultiSelectBtn');
   
-  if (!bar || !countEl || !deleteBtn) return;
+  if (!bar || !countEl) return;
   
   if (!multiSelectMode) {
     bar.style.display = 'none';
-    deleteBtn.disabled = true;
-    if (timeBtn) timeBtn.disabled = true;
-    if (noteBtn) noteBtn.disabled = true;
-    if (groupBtn) groupBtn.disabled = true;
-    if (ungroupBtn) ungroupBtn.disabled = true;
+    // Disable tất cả buttons
+    [deleteBtn, deleteBtnDesktop, timeBtn, timeBtnDesktop, noteBtn, noteBtnDesktop, groupBtn, groupBtnDesktop, ungroupBtn, ungroupBtnDesktop].forEach(btn => {
+      if (btn) btn.disabled = true;
+    });
     const table = document.getElementById('car-list');
     if (table) table.classList.remove('select-mode');
+    // Remove active class from Select button
+    if (selectBtn) selectBtn.classList.remove('active');
     return;
   }
   
   // Luôn hiển thị thanh khi ở chế độ chọn nhiều
   bar.style.display = 'flex';
   
+  // Add active class to Select button
+  if (selectBtn) selectBtn.classList.add('active');
+  
   const count = selectedIds.size;
   countEl.textContent = count;
   
   // Enable/disable các nút dựa trên số lượng xe đã chọn
-  deleteBtn.disabled = count === 0;
-  if (timeBtn) timeBtn.disabled = count === 0;
-  if (noteBtn) noteBtn.disabled = count === 0;
+  const deleteButtons = [deleteBtn, deleteBtnDesktop].filter(btn => btn);
+  const timeButtons = [timeBtn, timeBtnDesktop].filter(btn => btn);
+  const noteButtons = [noteBtn, noteBtnDesktop].filter(btn => btn);
+  const groupButtons = [groupBtn, groupBtnDesktop].filter(btn => btn);
+  const ungroupButtons = [ungroupBtn, ungroupBtnDesktop].filter(btn => btn);
+  
+  deleteButtons.forEach(btn => btn.disabled = count === 0);
+  timeButtons.forEach(btn => btn.disabled = count === 0);
+  noteButtons.forEach(btn => btn.disabled = count === 0);
   
   // Logic cho nút gộp/tách xe
-  if (groupBtn) {
-    groupBtn.disabled = count < 2; // Cần ít nhất 2 xe để gộp
-  }
-  if (ungroupBtn) {
+  groupButtons.forEach(btn => btn.disabled = count < 2); // Cần ít nhất 2 xe để gộp
+  
+  if (ungroupButtons.length > 0) {
     // Kiểm tra xem có xe nào có nhóm không
     const selectedCars = carList.filter(car => selectedIds.has(car.id));
     const hasGroupedCars = selectedCars.some(car => car.groupId);
-    ungroupBtn.disabled = !hasGroupedCars;
+    ungroupButtons.forEach(btn => btn.disabled = !hasGroupedCars);
   }
 }
 

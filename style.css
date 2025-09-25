@@ -395,6 +395,22 @@ body {
   min-width: auto;
 }
 
+/* Mobile dropdown optimization */
+#selectionBar .dropdown-menu {
+  min-width: 180px;
+  font-size: 0.9rem;
+}
+
+#selectionBar .dropdown-item {
+  padding: 8px 12px;
+  font-size: 0.85rem;
+}
+
+#selectionBar .dropdown-item i {
+  width: 16px;
+  margin-right: 8px;
+}
+
 @media (max-width: 768px) {
   #selectionBar {
     padding: 6px 10px !important;
@@ -407,9 +423,9 @@ body {
   
   #selectionBar .d-flex {
     flex-direction: row;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 3px;
+    flex-wrap: nowrap;
+    justify-content: space-between;
+    gap: 8px;
   }
   
   #selectionBar .btn {
@@ -428,6 +444,16 @@ body {
   #selectionBar span {
     font-size: 0.9rem;
   }
+  
+  /* Mobile: chỉ hiển thị 4 nút chính */
+  #selectionBar .d-md-none {
+    gap: 4px;
+  }
+  
+  #selectionBar .d-md-none .btn {
+    padding: 6px 8px;
+    font-size: 0.75rem;
+  }
 }
 
 @media (max-width: 480px) {
@@ -444,6 +470,17 @@ body {
   
   #selectionBar .btn i {
     font-size: 0.7rem;
+  }
+  
+  /* Mobile nhỏ: tối ưu dropdown */
+  #selectionBar .dropdown-menu {
+    min-width: 160px;
+    font-size: 0.8rem;
+  }
+  
+  #selectionBar .dropdown-item {
+    padding: 6px 10px;
+    font-size: 0.8rem;
   }
   
   /* Text đã được ẩn bằng Bootstrap class d-none d-md-inline */
@@ -559,6 +596,20 @@ body {
 #multiNoteModal .btn,
 #selectionBar .btn {
   color: #000 !important;
+}
+
+/* Visual feedback for Select button when active */
+#activateMultiSelectBtn.active {
+  background-color: #0dcaf0 !important;
+  color: #000 !important;
+  box-shadow: 0 0 10px rgba(13, 202, 240, 0.5);
+  animation: pulse-select 2s infinite;
+}
+
+@keyframes pulse-select {
+  0% { box-shadow: 0 0 10px rgba(13, 202, 240, 0.5); }
+  50% { box-shadow: 0 0 20px rgba(13, 202, 240, 0.8); }
+  100% { box-shadow: 0 0 10px rgba(13, 202, 240, 0.5); }
 }
 
 /* Nút xe đang ra trong menu: hiển thị đen tối nhưng vẫn bấm được */

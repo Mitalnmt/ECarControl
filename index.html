@@ -301,27 +301,63 @@
         <span>Đã chọn: <b id="selectionCount">0</b> dòng</span>
       </div>
       <div class="d-flex gap-2 flex-wrap">
-        <button class="btn btn-sm btn-outline-secondary" onclick="clearSelection()">
-          <i class="fas fa-times"></i><span class="d-none d-md-inline"> Bỏ chọn</span>
-        </button>
-        <button class="btn btn-sm btn-outline-primary" onclick="selectAllRows()">
-          <i class="fas fa-check-double"></i><span class="d-none d-md-inline"> Chọn tất cả</span>
-        </button>
-        <button class="btn btn-sm btn-success" id="selectionGroupBtn" onclick="groupSelectedCars()" disabled>
-          <i class="fas fa-layer-group"></i><span class="d-none d-md-inline"> Gộp xe</span>
-        </button>
-        <button class="btn btn-sm btn-warning" id="selectionUngroupBtn" onclick="ungroupSelectedCars()" disabled>
-          <i class="fas fa-layer-group"></i><span class="d-none d-md-inline"> Tách nhóm</span>
-        </button>
-        <button class="btn btn-sm btn-info" id="selectionTimeBtn" onclick="editTimeForSelectedCars()" disabled>
-          <i class="fas fa-clock"></i><span class="d-none d-md-inline"> Chỉnh thời gian</span>
-        </button>
-        <button class="btn btn-sm btn-secondary" id="selectionNoteBtn" onclick="editNoteForSelectedCars()" disabled>
-          <i class="fas fa-sticky-note"></i><span class="d-none d-md-inline"> Ghi chú</span>
-        </button>
-        <button class="btn btn-sm btn-danger" id="selectionDeleteBtn" onclick="deleteSelectedRows()" disabled>
-          <i class="fas fa-trash"></i><span class="d-none d-md-inline"> Xóa đã chọn</span>
-        </button>
+        <!-- Mobile: chỉ hiển thị các nút cần thiết nhất -->
+        <div class="d-flex d-md-none gap-1">
+          <button class="btn btn-sm btn-outline-secondary" onclick="clearSelection()">
+            <i class="fas fa-times"></i>
+          </button>
+          <button class="btn btn-sm btn-outline-primary" onclick="selectAllRows()">
+            <i class="fas fa-check-double"></i>
+          </button>
+          <button class="btn btn-sm btn-danger" id="selectionDeleteBtn" onclick="deleteSelectedRows()" disabled>
+            <i class="fas fa-trash"></i>
+          </button>
+          <!-- Dropdown menu cho các tính năng khác -->
+          <div class="dropdown">
+            <button class="btn btn-sm btn-info dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+              <i class="fas fa-ellipsis-v"></i>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end">
+              <li><button class="dropdown-item" id="selectionGroupBtn" onclick="groupSelectedCars()" disabled>
+                <i class="fas fa-layer-group"></i> Gộp xe
+              </button></li>
+              <li><button class="dropdown-item" id="selectionUngroupBtn" onclick="ungroupSelectedCars()" disabled>
+                <i class="fas fa-layer-group"></i> Tách nhóm
+              </button></li>
+              <li><button class="dropdown-item" id="selectionTimeBtn" onclick="editTimeForSelectedCars()" disabled>
+                <i class="fas fa-clock"></i> Chỉnh thời gian
+              </button></li>
+              <li><button class="dropdown-item" id="selectionNoteBtn" onclick="editNoteForSelectedCars()" disabled>
+                <i class="fas fa-sticky-note"></i> Ghi chú
+              </button></li>
+            </ul>
+          </div>
+        </div>
+        
+        <!-- Desktop: hiển thị tất cả nút -->
+        <div class="d-none d-md-flex gap-2 flex-wrap">
+          <button class="btn btn-sm btn-outline-secondary" onclick="clearSelection()">
+            <i class="fas fa-times"></i> Bỏ chọn
+          </button>
+          <button class="btn btn-sm btn-outline-primary" onclick="selectAllRows()">
+            <i class="fas fa-check-double"></i> Chọn tất cả
+          </button>
+          <button class="btn btn-sm btn-success" id="selectionGroupBtnDesktop" onclick="groupSelectedCars()" disabled>
+            <i class="fas fa-layer-group"></i> Gộp xe
+          </button>
+          <button class="btn btn-sm btn-warning" id="selectionUngroupBtnDesktop" onclick="ungroupSelectedCars()" disabled>
+            <i class="fas fa-layer-group"></i> Tách nhóm
+          </button>
+          <button class="btn btn-sm btn-info" id="selectionTimeBtnDesktop" onclick="editTimeForSelectedCars()" disabled>
+            <i class="fas fa-clock"></i> Chỉnh thời gian
+          </button>
+          <button class="btn btn-sm btn-secondary" id="selectionNoteBtnDesktop" onclick="editNoteForSelectedCars()" disabled>
+            <i class="fas fa-sticky-note"></i> Ghi chú
+          </button>
+          <button class="btn btn-sm btn-danger" id="selectionDeleteBtnDesktop" onclick="deleteSelectedRows()" disabled>
+            <i class="fas fa-trash"></i> Xóa đã chọn
+          </button>
+        </div>
       </div>
     </div>
   </div>
